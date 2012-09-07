@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  div.container
+    H2 task listing...
+    for t in tasks
+      div.row
+        div.span9 #{t.id}.#{t.file.name}
+          div.row(style="border-bottom: 1px solid rgb(28, 238, 238);")
+            div.span5
+              - var pencentage=(100*t.downloaded/t.file.size).toFixed(0);var barclass='active';if(t.status<0)barclass='progress-warning';if(t.status==0)barclass='progress-success';
+                span.badge(style="padding:3px; float: left; width: 25px; text-align: center;") #{pencentage}%
+                div.progress.progress-striped(class=barclass)
+                  div.bar(style='width:#{pencentage}% ;color:rgb(64,0,128)') #{t.getStatus()} 
+            div.span2 #{(t.downloaded/1024/1024).toFixed(2)}M/#{(t.file.size/1024/1024).toFixed(2)}M
+            div.span1 #{t.info.speed}k/s
+            div.span1 #{t.leftedTime()}s
