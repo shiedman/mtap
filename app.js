@@ -1,5 +1,6 @@
 /**
- * Module dependencies.
+ * shiedman@gmail.com
+ * main 
  */
 
 var express = require('express')
@@ -28,15 +29,27 @@ if(SERVER_PORT){
     logLevel='tiny',PORT=SERVER_PORT;
     ROOT='/home/dotcloud/data';
     process.env.SERVER=SERVER_PORT;
+    process.on('SIGTERM',function(){
+        console.warn(Date.now()+':proxyServer is exiting....');
+        process.exit(0);
+    });
 }
 
 var app = express();
 
 app.configure(function(){
-  //app.set('port', process.env.PORT_OTHER || 80);
   app.set('port', PORT);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
+  
+  app.use(function(req,res,next){
+      var user_agent=req.headers['user-agent'];
+      if(user_agent&&user_agent.indexOf('Firefox')<0){
+          res.send(404);res.end();
+      }else{
+          next();
+      }
+  });
 
 //http://www.senchalabs.org/connect/middleware-logger.html
   app.use(express.logger(logLevel));
@@ -78,7 +91,6 @@ app.get(/^\/_upload\/(.+)$/,function(req,res){
     }
 });
 */
-//function json2(k,v){return {jsonrpc:'2.0',id:1,k:v};}
 app.post('/__jsonrpc',function(req,res){
     var method=req.body.method;
     var params=req.body.params;
@@ -102,10 +114,6 @@ app.post('/__jsonrpc',function(req,res){
     }
 });
 app.post('/goagent',goagent.serve);
-//app.get('/_miru',forward('miru-yame.dotcloud.com',35721,'/'));
-
-
-
 
 app.configure('development', function(){
   app.use(express.errorHandler());

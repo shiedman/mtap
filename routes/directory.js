@@ -71,7 +71,3 @@ function get_file_size(size)
 	var gb = 1024 * mb; // Gigabyte
 	return size < kb ? size+'B' : size < mb ? (size / kb).toFixed(2)+'K' : size < gb ? (size / mb).toFixed(2)+'M' : (size / gb).toFixed(2)+'G';
 }
-/**
-var HTML='<html><head><title>Index of %s</title><style>th {text-align: left;}</style></head><body><h1>Index of %s</h1><pre><table cellpadding="0"><tr><th><a href="#">Name</a></th><th><a href="#">Modified</a></th><th><a href="#">Size</a></th></tr><tr><td colspan="3"><hr></td></tr><tr><td><a href="%s">Parent directory</a></td><td>&nbsp;-</td><td>&nbsp;&nbsp;-</td></tr>{{filelist}}</table></body></html>'
-var TR='<tr><td><a href="%s">%s</a></td><td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>'
-*/

@@ -3,7 +3,7 @@ extends layout
 block content
   div.container
     H2 task listing...
-    for t in tasks
+    for t in tasks.sort(function(a,b){return b.id-a.id})
       div.row
         div.span9 #{t.id}.#{t.file.name}
           div.row(style="border-bottom: 1px solid rgb(28, 238, 238);")
