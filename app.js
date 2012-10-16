@@ -4,23 +4,25 @@
  */
 
 var express = require('express')
-  //, user = require('./routes/user')
   , http = require('http')
   , net = require('net')
   , path = require('path')
   , urlparse = require('url').parse
   , util =require('util');
 
-var routes = require('./routes')
-  , dir=require('./routes/directory')
+var dir=require('./lib/directory')
   , httptask = require('./lib/httptask')
   , xunlei = require('./lib/xunlei')
   , baidu = require('./lib/baidu')
+  , weibo = require('./lib/weibo')
   , goagent = require('./lib/goagent')
+  , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
+  , dotcloud = require('./lib/dotcloud')
   , forward = require('./lib/forward');
 
-var SERVER_PORT=process.env.PORT_NODEJS||process.env.PORT_WWW;
+//var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
+var SERVER_PORT=process.env.PORT_WWW;
 var logLevel='dev'
   , PORT=80
   , ROOT='d:/home';
@@ -30,26 +32,17 @@ if(SERVER_PORT){
     ROOT='/home/dotcloud/data';
     process.env.SERVER=SERVER_PORT;
     process.on('SIGTERM',function(){
-        console.warn(Date.now()+':proxyServer is exiting....');
-        process.exit(0);
+        console.warn('proxyServer is exiting....');
+        process.exit(1);//if return 0,supervisor won't respawn proccess
     });
 }
 
 var app = express();
 
 app.configure(function(){
-  app.set('port', PORT);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
-  
-  app.use(function(req,res,next){
-      var user_agent=req.headers['user-agent'];
-      if(user_agent&&user_agent.indexOf('Firefox')<0){
-          res.send(404);res.end();
-      }else{
-          next();
-      }
-  });
+  app.enable('trust proxy');
 
 //http://www.senchalabs.org/connect/middleware-logger.html
   app.use(express.logger(logLevel));
@@ -59,15 +52,30 @@ app.configure(function(){
   app.use(function(req,res,next){
       if(req.url.substring(0,4)=='http')proxy.handle(req,res); else next();
   });
-  app.use('/aria2_jsonrpc',function (req,res,next){
+  app.use('/jsonrpc_',function (req,res,next){
       forward('localhost',6800,'/jsonrpc'+req.url.substring(1))(req,res);
   });
-
+/**
+  app.use(function(req,res,next){
+      if(req.url.substring(0,7)=='/upload')return next();
+      var user_agent=req.headers['user-agent'];
+      if(user_agent&&user_agent.indexOf('Firefox')<0){
+          res.send(404);res.end();
+      }else{
+          next();
+      }
+  });
+*/
   app.use(express.favicon());
   app.use(express.bodyParser());
   //app.use(express.methodOverride());
+  app.use(express.cookieParser('nosecret'));
+  app.use(express.cookieSession());
+  //app.use(express.session());
+
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'bootstrap')));
+  app.use(express.static(path.join(__dirname, 'static')));
 
   app.use(express.static(ROOT));
   app.use(dir.directory(ROOT));
@@ -75,8 +83,9 @@ app.configure(function(){
   setInterval(httptask.updateTask,30000);
 });
 //var auth=express.basicAuth('admin','supass');
-//app.get('/', routes.index);
 app.get('/tasks',httptask.viewTasks);
+app.post('/agentfetch',goagent.serve);
+app.post('/wallfetch',wallproxy.serve);
 /**
 app.get(/^\/_upload\/(.+)$/,function(req,res){
     try{
@@ -96,9 +105,12 @@ app.post('/__jsonrpc',function(req,res){
     var params=req.body.params;
     try{
         if(method=='xunlei.upload'){
-            xunlei.upload(params.file);
+            httptask.queue(xunlei.upload,[params.file]);
+            //xunlei.upload(params.file);
         }else if(method=='baidu.upload'){
             baidu.upload(params.file);
+        }else if(method=='weibo.upload'){
+            weibo.upload(params.file);
         }else if(method=='httptask.deleteTask'){
             var ret=httptask.deleteTask(params.taskid);
             if(ret<0)throw  new Error(params.taskid+' not exists');
@@ -110,20 +122,33 @@ app.post('/__jsonrpc',function(req,res){
         }
         res.json({jsonrpc:'2.0',id:1,result:'success'});
     }catch(err){
+        console.log(err.message);
+        console.log(err.stack);
         res.json({jsonrpc:'2.0',id:1,error:{message:err.message}});
     }
 });
-app.post('/goagent',goagent.serve);
 
 app.configure('development', function(){
-  app.use(express.errorHandler());
+    app.use(express.errorHandler({ showStack: true, dumpExceptions: true }));
+    app.get('/dotcloud',dotcloud.get);
+    app.post('/dotcloud',dotcloud.post);
+});
+app.configure('production', function(){
+    app.use(express.errorHandler());
 });
 
+
+app.get('/info',function(req,res){
+    var _env=require('/home/dotcloud/environment.json');
+    var _conf={
+        http_url:_env.DOTCLOUD_WWW_HTTP_URL,
+        ssh_url:_env.DOTCLOUD_WWW_SSH_URL.replace('ssh://',''),
+        proxy_url:_env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://','')
+    }
+    res.render('info',{conf:_conf});
+});
 
 var httpserver=http.createServer(app);
-httpserver.listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
-});
 httpserver.on('connect', function(req, cltSocket, head) {
     var srvUrl = urlparse('http://' + req.url);
     util.log('CONNECT: '+req.url);
@@ -144,3 +169,19 @@ httpserver.on('connect', function(req, cltSocket, head) {
 httpserver.on('clientError',function(err){
     util.log('clientError: '+err.message);
 });
+
+if(SERVER_PORT){
+var tty=require('./tty/tty.js');
+var ttyapp=tty.createServer({
+    app:app,
+    server:httpserver,
+	shell:'bash',
+	port: PORT
+});
+ttyapp.listen();
+}else{
+
+httpserver.listen(PORT, function(){
+  console.log("Express server listening on port %s",PORT);
+});
+}

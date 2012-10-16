@@ -1,12 +1,15 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
+  "name": "mini-proxy",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "start": "node app"
   },
   "dependencies": {
-    "express": "3.0.0rc4",
-    "jade": "*"
+    "express": "3.x",
+    "jade": "*",
+    "iconv":"*",
+    "socket.io": "0.9.10",
+    "pty.js": "0.1.2"
   }
 }
