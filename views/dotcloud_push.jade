@@ -1,0 +1,42 @@
+extends layout
+
+block nav
+  li
+    a(href='/') files
+  li
+    a(href='/tasks') tasks
+  li
+    a(href='/yaaw') aria2
+  li.active
+    a(href='/dotcloud') dotcloud
+
+block content
+  div.container
+    div.alert.alert-info
+      div#title1
+        img(src='/img/spinner.gif')
+        | pushing data, please wait
+      pre.pre-scrollable ${msg}
+      //-
+        pre
+          |miru (flavor: sandbox):
+          |  - www (type: custom; instances: 1)
+          |&nbsp;
+          |gomi (flavor: sandbox):
+          |  - www (type: custom; instances: 1)
+      div.alert.alert-warning
+        strong site:
+        |${www}
+
+  script
+    setTimeout(function(){
+      var url='${www}';
+      if(url){
+      document.getElementById('title1').className='alert alert-warning';
+      document.getElementById('title1').innerHTML='<strong>site created:</strong>&nbsp;&nbsp;&nbsp;<a href="'+url+'">'+url+'</a>';
+      }else{
+      document.getElementById('title1').className='alert alert-error';
+      document.getElementById('title1').innerHTML='<strong>build error:</strong>&nbsp;&nbsp;&nbsp;check your config,and try again later.';
+      }
+    },1000);
+    

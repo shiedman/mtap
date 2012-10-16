@@ -1,0 +1,104 @@
+extends layout
+
+block jscript
+  script(src='/js/jquery-1.8.2.min.js',type="text/javascript")
+  script(src='/js/jquery.validate.js',type="text/javascript")
+  script(src='/js/bootstrap.min.js',type="text/javascript")
+  script(type='text/javascript')
+    $(document).ready(function(){
+      jQuery.validator.addMethod('apikey',function(value,element){
+        var result=value.length==61 && /^\w{20}:\w{40}$/.test(value);
+        if(!result){
+            element.value='';
+            var validator=this;
+            setTimeout(function(){
+              validator.blockFocusCleanup=true;
+              element.focus();
+              validator.blockFocusCleanup=false;
+            },1);
+        }
+        return result;
+      },"Invalid Apikey");
+      $('#form1').validate({
+        onkeyup:false,
+        errorPlacement:function(error,element){
+          error.insertBefore(element);
+        },
+        errorClass:'text-error',
+        rules:{
+          apikey:'apikey'
+        },
+      });
+      $('#form2').validate({
+        onkeyup:false,
+        errorPlacement:function(error,element){
+          error.insertBefore(element);
+        },
+        errorClass:'text-error',
+        rules:{
+          appname:{required:true,minlength:4}
+        },
+      });
+
+    });
+
+block nav.dotcloud
+  li.active
+    a(href='/dotcloud') dotcloud
+
+block content
+  div.container
+    div
+      p.lead 1.create dotcloud account
+      p go to :
+        a(target='_blank',href='https://www.dotcloud.com/') https://www.dotcloud.com/
+        |&nbsp;if u don't have one 
+    div
+      p.lead 2.setup dotcloud's apikey
+      if conf.apikey 
+        form#form1.form-serach(method='post')
+          div.control-group.success.input-append
+            input#apikey.span7.serach-qurey(name='apikey',value=conf.apikey,type='text',placeholder='apikey')
+            button.btn.btn-primary(type='submit') change 
+      else
+        if locals.errkey
+          div.alert.alert-error(style='width:450px')=locals.errkey
+        form#form1.form-serach(method='post')
+          div.input-append
+            input#apikey.span7.serach-qurey(name='apikey',type='text',placeholder='apikey')
+            button.btn.btn-primary(type='submit') setup
+    div
+      if conf.apikey
+        p.lead 3.create new application
+        div.alert.alert-info
+          a.btn.btn-mini.btn-primary(href='/dotcloud?refresh=1') refresh 
+          strong current apps:
+            //- textarea(readonly,style='width:400px;overflow-y:hidden',rows='#{conf.rows||2}')=conf.applist
+          pre.pre-scrollabe=conf.applist
+        form#form2.form-serach(method='post')
+          div.input-append
+            input#appname.span2.serach-qurey(name='appname',type='text',placeholder='appname')
+            button.btn.btn-primary(type='submit') create
+    if 0
+      div.modal.show#myModal(tabindex='-1',role='dialog',aria-labelledby='myModalLabel',aria-hidden='true')
+        div.modal-header
+          button.close(type='button',data-dismiss='modal',aria-hidden='true') x
+          h4#myModalLabel
+            img(src='/img/spinner.gif')
+            | pushing data, please wait
+        div.modal-body
+          // textarea#build_log(rows='10',style='width:98%',readonly) #$$#
+          iframe#logframe(src='/dotcloud_push',frameborder='0',width='100%',onload="clearInterval(logid);$('#myModalLabel').html('push finished')") loading....
+        //
+          div.modal-footer
+            button.btn(data-dismiss='modal',aria-hidden='true') Close
+      script
+        //$('#myModal').modal('show')
+        $('#myModal').modal('toggle')
+        var logid=setInterval(function(){$('#logframe').prop('contentWindow').scrollBy(0,300);},2000);
+//
+  script
+    var _log=document.getElementById('build_log');
+    for(var i=0;i<100;i++){
+    _log.appendChild(document.createTextNode(i+':blhad dheee\n'));
+    }

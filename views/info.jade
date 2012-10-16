@@ -1,0 +1,14 @@
+extends layout
+
+block nav.info
+  li.active
+    a(href='/info') info 
+
+block content
+  div.container
+    div.alert.alert-info
+      strong host's info
+      pre
+        |ssh: #{conf.ssh_url}
+        |http: #{conf.http_url}
+        |proxy: #{conf.proxy_url}
