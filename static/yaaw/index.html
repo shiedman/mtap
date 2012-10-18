@@ -11,6 +11,14 @@
     <![endif]-->
     <style>
       body{padding-top: 40px;}
+  .modal{ font-size:12px;line-height:18px;width:530px; }
+.modal .form-horizontal .control-group { margin-bottom: 10px; }
+.modal-header{ padding:5px }
+.modal-footer{ padding:5px }
+.btn{font-size:12px;line-height:18px;}
+#uri-input{font-size:12px;line-height:18px;height:18px}
+#add-task-uri{padding:2px;}
+label,input,button,select,textarea{ font-size: 12px; line-height: 18px; }
     </style>
   </head>
   <body>
@@ -156,7 +164,7 @@
       <button class="close" data-dismiss="modal">×</button>
       <h3>Add Task</h3>
     </div>
-    <div class="modal-body">
+    <div class="modal-body"  >
       <div id="add-task-alert" class="alert alert-error hide">
         <a href="###" onclick="$('#add-task-alert').hide();" class="close">×</a>
         <strong>Error:</strong> <span class="alert-msg"></span>
