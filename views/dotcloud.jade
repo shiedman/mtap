@@ -1,47 +1,5 @@
 extends layout
 
-block jscript
-  script(src='/js/jquery-1.8.2.min.js',type="text/javascript")
-  script(src='/js/jquery.validate.js',type="text/javascript")
-  script(src='/js/bootstrap.min.js',type="text/javascript")
-  script(type='text/javascript')
-    $(document).ready(function(){
-      jQuery.validator.addMethod('apikey',function(value,element){
-        var result=value.length==61 && /^\w{20}:\w{40}$/.test(value);
-        if(!result){
-            element.value='';
-            var validator=this;
-            setTimeout(function(){
-              validator.blockFocusCleanup=true;
-              element.focus();
-              validator.blockFocusCleanup=false;
-            },1);
-        }
-        return result;
-      },"Invalid Apikey");
-      $('#form1').validate({
-        onkeyup:false,
-        errorPlacement:function(error,element){
-          error.insertBefore(element);
-        },
-        errorClass:'text-error',
-        rules:{
-          apikey:'apikey'
-        },
-      });
-      $('#form2').validate({
-        onkeyup:false,
-        errorPlacement:function(error,element){
-          error.insertBefore(element);
-        },
-        errorClass:'text-error',
-        rules:{
-          appname:{required:true,minlength:4}
-        },
-      });
-
-    });
-
 block nav.dotcloud
   li.active
     a(href='/dotcloud') dotcloud
@@ -102,3 +60,44 @@ block content
     for(var i=0;i<100;i++){
     _log.appendChild(document.createTextNode(i+':blhad dheee\n'));
     }
+block foot
+  script(src='/js/jquery-1.8.2.min.js',type="text/javascript")
+  script(src='/js/jquery.validate.js',type="text/javascript")
+  script(src='/js/bootstrap.min.js',type="text/javascript")
+  script(type='text/javascript')
+    $(document).ready(function(){
+      jQuery.validator.addMethod('apikey',function(value,element){
+        var result=value.length==61 && /^\w{20}:\w{40}$/.test(value);
+        if(!result){
+            element.value='';
+            var validator=this;
+            setTimeout(function(){
+              validator.blockFocusCleanup=true;
+              element.focus();
+              validator.blockFocusCleanup=false;
+            },1);
+        }
+        return result;
+      },"Invalid Apikey");
+      $('#form1').validate({
+        onkeyup:false,
+        errorPlacement:function(error,element){
+          error.insertBefore(element);
+        },
+        errorClass:'text-error',
+        rules:{
+          apikey:'apikey'
+        },
+      });
+      $('#form2').validate({
+        onkeyup:false,
+        errorPlacement:function(error,element){
+          error.insertBefore(element);
+        },
+        errorClass:'text-error',
+        rules:{
+          appname:{required:true,minlength:4}
+        },
+      });
+
+    });

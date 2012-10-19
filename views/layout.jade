@@ -4,14 +4,9 @@ html
     meta(charset='utf-8')
     title y2proxy_
     link(rel='stylesheet', href='/css/bootstrap.min.css')
-    block jscript
+    block head 
     style
         body{padding-top: 40px;}
-        td [class^="icon-"]{
-            display: inline-block;
-            width: 1.25em;
-            text-align: center;
-        }
   body
     div.navbar.navbar-inverse.navbar-fixed-top
         div.navbar-inner
@@ -40,3 +35,4 @@ html
                               a(href='/dotcloud') dotcloud
 
     block content
+    block foot

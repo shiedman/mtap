@@ -50,42 +50,30 @@ app.configure(function(){
   app.use(xunlei.logRequest);
   app.use(baidu.logRequest);
   app.use(function(req,res,next){
-      if(req.url.substring(0,4)=='http')proxy.handle(req,res); else next();
+      if(req.url.substring(0,4)=='http'){ proxy.handle(req,res); }else{ next();}
   });
   app.use('/jsonrpc_',function (req,res,next){
       forward('localhost',6800,'/jsonrpc'+req.url.substring(1))(req,res);
   });
-/**
-  app.use(function(req,res,next){
-      if(req.url.substring(0,7)=='/upload')return next();
-      var user_agent=req.headers['user-agent'];
-      if(user_agent&&user_agent.indexOf('Firefox')<0){
-          res.send(404);res.end();
-      }else{
-          next();
-      }
-  });
-*/
   app.use(express.favicon());
   app.use(express.bodyParser());
   //app.use(express.methodOverride());
+
+
   app.use(express.cookieParser('nosecret'));
   app.use(express.cookieSession());
   //app.use(express.session());
-
   app.use(app.router);
+
   app.use(express.static(path.join(__dirname, 'bootstrap')));
   app.use(express.static(path.join(__dirname, 'static')));
-
   app.use(express.static(ROOT));
   app.use(dir.directory(ROOT));
+
   app.locals.pretty=true;
   setInterval(httptask.updateTask,30000);
 });
 //var auth=express.basicAuth('admin','supass');
-app.get('/tasks',httptask.viewTasks);
-app.post('/agentfetch',goagent.serve);
-app.post('/wallfetch',wallproxy.serve);
 /**
 app.get(/^\/_upload\/(.+)$/,function(req,res){
     try{
@@ -100,6 +88,10 @@ app.get(/^\/_upload\/(.+)$/,function(req,res){
     }
 });
 */
+app.get('/tasks',httptask.viewTasks);
+app.post('/agentfetch',goagent.serve);
+app.post('/wallfetch',wallproxy.serve);
+
 app.post('/__jsonrpc',function(req,res){
     var method=req.body.method;
     var params=req.body.params;
@@ -139,11 +131,14 @@ app.configure('production', function(){
 
 
 app.get('/info',function(req,res){
-    var _env=require('/home/dotcloud/environment.json');
-    var _conf={
+    var _conf={http_url:'http://localhost/',ssh_url:'',proxy_url:'localhost'};
+    if(SERVER_PORT){
+        var _env=require('/home/dotcloud/environment.json');
+        _conf={
         http_url:_env.DOTCLOUD_WWW_HTTP_URL,
         ssh_url:_env.DOTCLOUD_WWW_SSH_URL.replace('ssh://',''),
         proxy_url:_env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://','')
+        }
     }
     res.render('info',{conf:_conf});
 });
