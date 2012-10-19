@@ -1,4 +1,11 @@
 extends layout
+block head 
+  style
+    td [class^="icon-"]{
+      display: inline-block;
+      width: 1.25em;
+      text-align: center;
+    }
 block nav.files
   li.active
     a(href='/') files

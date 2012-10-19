@@ -18,7 +18,7 @@ var dir=require('./lib/directory')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
-  , dotcloud = require('./lib/dotcloud')
+  , dotcloud = require('./lib/dotcloud') //##remove##
   , forward = require('./lib/forward');
 
 //var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
@@ -122,8 +122,8 @@ app.post('/__jsonrpc',function(req,res){
 
 app.configure('development', function(){
     app.use(express.errorHandler({ showStack: true, dumpExceptions: true }));
-    app.get('/dotcloud',dotcloud.get);
-    app.post('/dotcloud',dotcloud.post);
+    app.get('/dotcloud',dotcloud.get);//##remove##
+    app.post('/dotcloud',dotcloud.post);//##remove##
 });
 app.configure('production', function(){
     app.use(express.errorHandler());
