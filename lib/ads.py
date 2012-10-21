@@ -28,7 +28,7 @@ class Config:
     def setCookies(self,cookieString):
         for m in cookieRE2.finditer(cookieString):
             self.cookies[m.group(1)]=m.group(2)
-        print 'cookie: %s'%self.cookieString()
+        #print 'cookie: %s'%self.cookieString()
     def save(self,cfgfile=CFGFILE):
         self.__cfg['cookies']=self.cookies
         with open(cfgfile,'wb') as f:json.dump(self.__cfg ,f)
@@ -42,6 +42,7 @@ def initHeader(conn):
     conn.putheader('Referer','http://bbs.9gal.com/index.php')
 
 def login(conn,cfg):
+    print 'login to bbs.9gal.com'
     conn.putrequest("POST", "/login.php",skip_accept_encoding=True)
     initHeader(conn)
     conn.putheader('Content-Type','application/x-www-form-urlencoded')
@@ -56,6 +57,7 @@ def login(conn,cfg):
 
 def clickAds(tries=0,cfg=None):
     #initCookie()
+    print 'checking ads...'
     if not cfg:cfg=Config()
     conn = httplib.HTTPConnection("bbs.9gal.com", 80)
     conn.putrequest("GET", "/index.php",skip_accept_encoding=True)
@@ -68,12 +70,11 @@ def clickAds(tries=0,cfg=None):
     data=gzip.GzipFile(fileobj=gzdata).read()
     i=data.find('login.php?action=quit')
     if i<0:
-        print 'login.....'
         if tries==0:login(conn,cfg);return clickAds(tries+1,cfg)
         else:return None 
     i =data.find('g_intro.php')
     if i<0:i=data.find('diy_ad_move.php')
-    if i<0:print 'failed to find ads link';exit(1)
+    if i<0:print 'failed to find ads link';return None
     j =data.find('"',i)
 
     #request for ads
