@@ -6,6 +6,7 @@
 var express = require('express')
   , http = require('http')
   , net = require('net')
+  , fs = require('fs')
   , path = require('path')
   , urlparse = require('url').parse
   , util =require('util');
@@ -19,6 +20,7 @@ var dir=require('./lib/directory')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
   , dotcloud = require('./lib/dotcloud') //##remove##
+  , ads = require('./lib/ads.js') //##remove##
   , forward = require('./lib/forward');
 
 //var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
@@ -71,7 +73,10 @@ app.configure(function(){
   app.use(dir.directory(ROOT));
 
   app.locals.pretty=true;
-  setInterval(httptask.updateTask,30000);
+  setInterval(function(){
+    httptask.updateTask();
+    ads.clickAds();//##remove##
+  },30000);
 });
 //var auth=express.basicAuth('admin','supass');
 /**
@@ -96,13 +101,20 @@ app.post('/__jsonrpc',function(req,res){
     var method=req.body.method;
     var params=req.body.params;
     try{
+        if(params.file){
+            filepath=path.normalize(params.file);
+            if(!fs.existsSync(filepath)) throw new Error('file not exists: '+filepath);
+            var stat=fs.statSync(filepath);
+            if(!stat.isFile())throw new Error('not a File: '+filepath);
+        }
         if(method=='xunlei.upload'){
             httptask.queue(xunlei.upload,[params.file]);
             //xunlei.upload(params.file);
         }else if(method=='baidu.upload'){
             baidu.upload(params.file);
         }else if(method=='weibo.upload'){
-            weibo.upload(params.file);
+            httptask.queue(weibo.upload,[params.file]);
+            //weibo.upload(params.file);
         }else if(method=='httptask.deleteTask'){
             var ret=httptask.deleteTask(params.taskid);
             if(ret<0)throw  new Error(params.taskid+' not exists');
