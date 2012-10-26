@@ -45,9 +45,11 @@ if(SERVER_PORT){
     });
     function _watchfile(){
     fs.watchFile(ut.Cookie.file,function(cur,prev){
+        console.log('reloading %s',ut.Cookie.file);
         ut.Cookie.load();
     });
-    fs.watchFile(ui.ini.file,function(cur,prev){
+    fs.watchFile(ut.ini.file,function(cur,prev){
+        console.log('reloading %s',ut.ini.file);
         ut.ini.load();
     });
     }
