@@ -31,6 +31,7 @@ var logLevel='dev'
   , PORT=80
   , ROOT='d:/home';
 
+ut.Cookie.load();ut.ini.load();
 if(SERVER_PORT){
     logLevel='tiny',PORT=SERVER_PORT;
     ROOT='/home/dotcloud/data';
@@ -42,9 +43,22 @@ if(SERVER_PORT){
         ut.ini.write();
         process.exit(1);//if return 0,supervisor won't respawn proccess
     });
-    ut.Cookie.load();
+    function _watchfile(){
+    fs.watchFile(ut.Cookie.file,function(cur,prev){
+        ut.Cookie.load();
+    });
+    fs.watchFile(ui.ini.file,function(cur,prev){
+        ut.ini.load();
+    });
+    }
+    _watchfile();
     //execute every 1 hour
-    setInterval(function(){ ut.Cookie.save();ut.ini.write(); },3600000);
+    setInterval(function(){
+        fs.unwatchFile(ut.Cookie.file);
+        fs.unwatchFile(ut.ini.file);
+        ut.Cookie.save();ut.ini.write(); 
+        setTimeout(_watchfile,10000);
+    },3600000);
     //execute every 10mins
     setInterval(function(){ _9gal.takeBonus();_115.takeBonus(); },600000);//##remove##
 }
