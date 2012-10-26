@@ -38,9 +38,9 @@ if(SERVER_PORT){
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
         console.warn('proxyServer is exiting....');
-        process.exit(1);//if return 0,supervisor won't respawn proccess
         ut.Cookie.save();
         ut.ini.write();
+        process.exit(1);//if return 0,supervisor won't respawn proccess
     });
     ut.Cookie.load();
     //execute every 1 hour
