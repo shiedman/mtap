@@ -11,7 +11,8 @@ var express = require('express')
   , urlparse = require('url').parse
   , util =require('util');
 
-var dir=require('./lib/directory')
+var ut=require('./lib/utility.js')
+  ,dir=require('./lib/directory')
   , httptask = require('./lib/httptask')
   , xunlei = require('./lib/xunlei')
   , baidu = require('./lib/baidu')
@@ -20,7 +21,8 @@ var dir=require('./lib/directory')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
   , dotcloud = require('./lib/dotcloud') //##remove##
-  , ads = require('./lib/ads.js') //##remove##
+  , _9gal = require('./lib/9gal.js') //##remove##
+  , _115 = require('./lib/115.js') //##remove##
   , forward = require('./lib/forward');
 
 //var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
@@ -34,10 +36,21 @@ if(SERVER_PORT){
     ROOT='/home/dotcloud/data';
     process.env.SERVER=SERVER_PORT;
     process.on('SIGTERM',function(){
+    //process.on('exit',function(){
         console.warn('proxyServer is exiting....');
         process.exit(1);//if return 0,supervisor won't respawn proccess
+        ut.Cookie.save();
+        ut.ini.write();
     });
+    //execute every 1 hour
+    setInterval(function(){ ut.Cookie.save();ut.ini.write(); },3600000);//##remove##
+    //execute every 10mins
+    setInterval(function(){ _9gal.takeBonus();_115.takeBonus(); },600000);//##remove##
 }
+//process.on('SIGINT', function () {
+  //console.log('Got SIGINT.  Press Control-D to exit.');
+//});
+
 
 var app = express();
 
@@ -49,8 +62,8 @@ app.configure(function(){
 //http://www.senchalabs.org/connect/middleware-logger.html
   app.use(express.logger(logLevel));
 
-  app.use(xunlei.logRequest);
-  app.use(baidu.logRequest);
+  //app.use(xunlei.logRequest);
+  //app.use(baidu.logRequest);
   app.use(function(req,res,next){
       if(req.url.substring(0,4)=='http'){ proxy.handle(req,res); }else{ next();}
   });
@@ -73,10 +86,7 @@ app.configure(function(){
   app.use(dir.directory(ROOT));
 
   app.locals.pretty=true;
-  setInterval(function(){
-    httptask.updateTask();
-    ads.clickAds();//##remove##
-  },30000);
+  setInterval(function(){ httptask.updateTask();},30000);
 });
 //var auth=express.basicAuth('admin','supass');
 /**
