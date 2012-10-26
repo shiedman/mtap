@@ -42,8 +42,9 @@ if(SERVER_PORT){
         ut.Cookie.save();
         ut.ini.write();
     });
+    ut.Cookie.load();
     //execute every 1 hour
-    setInterval(function(){ ut.Cookie.save();ut.ini.write(); },3600000);//##remove##
+    setInterval(function(){ ut.Cookie.save();ut.ini.write(); },3600000);
     //execute every 10mins
     setInterval(function(){ _9gal.takeBonus();_115.takeBonus(); },600000);//##remove##
 }
