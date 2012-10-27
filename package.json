@@ -9,6 +9,7 @@
     "express": "3.x",
     "jade": "*",
     "iconv":"*",
+    "tracer":"*",
     "socket.io": "0.9.10",
     "pty.js": "0.1.2"
   }
