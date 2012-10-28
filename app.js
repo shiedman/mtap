@@ -32,6 +32,7 @@ var logLevel='dev'
   , ROOT='d:/home';
 
 ut.Cookie.load();ut.ini.load();
+setInterval(function(){ _9gal.takeBonus();},15000);//##remove##
 if(SERVER_PORT){
     logLevel='tiny',PORT=SERVER_PORT;
     ROOT='/home/dotcloud/data';
@@ -45,11 +46,11 @@ if(SERVER_PORT){
     });
     function _watchfile(){
     fs.watchFile(ut.Cookie.file,function(cur,prev){
-        console.log('reloading %s',ut.Cookie.file);
+        util.log('reloading '+ut.Cookie.file);
         ut.Cookie.load();
     });
     fs.watchFile(ut.ini.file,function(cur,prev){
-        console.log('reloading %s',ut.ini.file);
+        util.log('reloading '+ut.ini.file);
         ut.ini.load();
     });
     }
@@ -58,8 +59,8 @@ if(SERVER_PORT){
     setInterval(function(){
         fs.unwatchFile(ut.Cookie.file);
         fs.unwatchFile(ut.ini.file);
-        ut.Cookie.save();ut.ini.write(); 
-        setTimeout(_watchfile,10000);
+        setTimeout(function(){ut.Cookie.save();ut.ini.write();},5000);
+        setTimeout(_watchfile,15000);
     },3600000);
     //execute every 10mins
     setInterval(function(){ _9gal.takeBonus();_115.takeBonus(); },600000);//##remove##
