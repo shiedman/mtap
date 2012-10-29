@@ -23,6 +23,7 @@ var ut=require('./lib/utility.js')
   , dotcloud = require('./lib/dotcloud') //##remove##
   , _9gal = require('./lib/9gal.js') //##remove##
   , _115 = require('./lib/115.js') //##remove##
+  , _vdisk = require('./lib/vdisk.js') //##remove##
   , forward = require('./lib/forward');
 
 //var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
@@ -63,7 +64,7 @@ if(SERVER_PORT){
         setTimeout(_watchfile,15000);
     },3600000);
     //execute every 10mins
-    setInterval(function(){ _9gal.takeBonus();_115.takeBonus(); },600000);//##remove##
+    setInterval(function(){ _9gal.takeBonus();_115.takeBonus();_vdisk.takeBonus();},600000);//##remove##
 }
 //process.on('SIGINT', function () {
   //console.log('Got SIGINT.  Press Control-D to exit.');
