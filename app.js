@@ -39,7 +39,7 @@ if(SERVER_PORT){
     process.env.SERVER=SERVER_PORT;
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
-        console.warn('proxyServer is exiting....');
+        console.warn(new Date()+' proxyServer is exiting....');
         ut.Cookie.save();
         ut.ini.write();
         process.exit(1);//if return 0,supervisor won't respawn proccess
