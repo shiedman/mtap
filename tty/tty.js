@@ -440,12 +440,18 @@ Session.prototype.handleCreate = function(cols, rows, func) {
     return func({ error: 'Terminal limit.' });
   }
 
+  var _env={}; //dotcloud
+  for (var k in process.env){_env[k]=process.env[k];}//dotcloud
+  _env['SETTINGS_FLAVOR']=Date.now();//dotcloud
   term = pty.fork(conf.shell, conf.shellArgs, {
     name: conf.termName,
     cols: cols,
     rows: rows,
-    cwd: conf.cwd || process.env.HOME
+    cwd: conf.cwd || process.env.HOME,
+    env: _env
   });
+
+  //term.write('. $HOME/env/bin/activate\r');//dotcloud
 
   id = term.pty;
   terms[id] = term;

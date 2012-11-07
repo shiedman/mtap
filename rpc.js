@@ -80,6 +80,19 @@ function abortTask(id){
         }
     });
 }
+function listTask(stype){
+    jsonRPC(upload_url,'httptask.listTask',{type:stype},function(err,json){
+        if(err){console.error('failed to invoke remote jsonrpc:'+err.message);return;}
+        if(json.error){
+            console.error('abort failed:'+json.error.message);
+        }else{
+            var list=json.result.data;
+            for(var i=0;i<list.length;i++){
+                console.log(list[i]);
+            }
+        }
+    });
+}
 
 //deleteTask(1);
 var len=process.argv.length;
@@ -90,6 +103,8 @@ if('del'==action){
     deleteTask(parseInt(params));
 }else if('abort'==action){
     abortTask(parseInt(params));
+}else if('list'==action){
+    listTask(parseInt(params));
 }else if(/\.upload$/.test(action)){
     var file=path.resolve(process.argv[3]);
     upload(file,action);

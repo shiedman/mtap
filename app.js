@@ -20,7 +20,7 @@ var ut=require('./lib/utility.js')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
-  , dotcloud = require('./lib/dotcloud') //##remove##
+  //, dotcloud = require('./lib/dotcloud') //##remove##
   , _9gal = require('./lib/9gal.js') //##remove##
   , _115 = require('./lib/115.js') //##remove##
   , _vdisk = require('./lib/vdisk.js') //##remove##
@@ -33,7 +33,7 @@ var logLevel='dev'
   , ROOT='d:/home';
 
 ut.Cookie.load();ut.ini.load();
-setInterval(function(){ _9gal.takeBonus();},15000);//##remove##
+//setInterval(function(){ _9gal.takeBonus();},15000);//##remove##
 if(SERVER_PORT){
     logLevel='tiny',PORT=SERVER_PORT;
     ROOT='/home/dotcloud/data';
@@ -94,8 +94,8 @@ app.configure(function(){
   //app.use(express.methodOverride());
 
 
-  app.use(express.cookieParser('nosecret'));
-  app.use(express.cookieSession());
+  //app.use(express.cookieParser('nosecret'));
+  //app.use(express.cookieSession());
   //app.use(express.session());
   app.use(app.router);
 
@@ -150,6 +150,10 @@ app.post('/__jsonrpc',function(req,res){
         }else if(method=='httptask.abortTask'){
             var ret=httptask.abortTask(params.taskid);
             if(ret<0)throw  new Error(params.taskid+' not exists');
+        }else if(method=='httptask.listTask'){
+            var ret=httptask.listTask(params.type);
+            if(!ret)throw  new Error('empty task list');
+            return res.json({jsonrpc:'2.0',id:1,result:{'data':ret}});
         }else{
             throw new Error('method:'+method+' not exists');
         }
@@ -163,8 +167,8 @@ app.post('/__jsonrpc',function(req,res){
 
 app.configure('development', function(){
     app.use(express.errorHandler({ showStack: true, dumpExceptions: true }));
-    app.get('/dotcloud',dotcloud.get);//##remove##
-    app.post('/dotcloud',dotcloud.post);//##remove##
+    //app.get('/dotcloud',dotcloud.get);//##remove##
+    //app.post('/dotcloud',dotcloud.post);//##remove##
 });
 app.configure('production', function(){
     app.use(express.errorHandler());
