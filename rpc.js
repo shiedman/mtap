@@ -87,8 +87,10 @@ function listTask(stype){
             console.error('abort failed:'+json.error.message);
         }else{
             var list=json.result.data;
+            console.log('*********************************************');
             for(var i=0;i<list.length;i++){
                 console.log(list[i]);
+                console.log('==============================================');
             }
         }
     });
@@ -96,14 +98,15 @@ function listTask(stype){
 
 //deleteTask(1);
 var len=process.argv.length;
-if(len<4){console.log('need more params');return;}
 var action=process.argv[2];
 var params=process.argv[3];
+if(len<4 && 'list'!=action){console.log('need more params');return;}
 if('del'==action){
     deleteTask(parseInt(params));
 }else if('abort'==action){
     abortTask(parseInt(params));
 }else if('list'==action){
+    if(!params)params='0';
     listTask(parseInt(params));
 }else if(/\.upload$/.test(action)){
     var file=path.resolve(process.argv[3]);
