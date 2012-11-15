@@ -13,3 +13,8 @@ block content
         |proxy: #{conf.proxy_url}
         |goagent: #{conf.http_url}agentfetch
         |wallproxy: #{conf.http_url}wallfetch
+    div.alert.alert-info
+      form#form1(method='post')
+        strong y2proxy.ini
+        input.btn.btn-primary(type='submit',value='save') 
+        textarea#ini(name='ini',rows='20',style='width:100%')=conf.ini
