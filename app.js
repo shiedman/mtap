@@ -16,14 +16,14 @@ var ut=require('./lib/utility.js')
   , httptask = require('./lib/httptask')
   , xunlei = require('./lib/xunlei')
   , baidu = require('./lib/baidu')
-  , weibo = require('./lib/weibo')
+  , vdisk = require('./lib/vdisk')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
   //, dotcloud = require('./lib/dotcloud') //##remove##
   , _9gal = require('./lib/9gal.js') //##remove##
   , _115 = require('./lib/115.js') //##remove##
-  , _vdisk = require('./lib/vdisk.js') //##remove##
+  , _weibo = require('./lib/weibo.js') //##remove##
   , forward = require('./lib/forward');
 
 //var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
@@ -64,7 +64,7 @@ if(SERVER_PORT){
         setTimeout(_watchfile,15000);
     },3600000);
     //execute every 10mins
-    setInterval(function(){ _9gal.takeBonus();_115.takeBonus();_vdisk.takeBonus();},600000);//##remove##
+    setInterval(function(){ _9gal.takeBonus();_115.takeBonus();_weibo.takeBonus();},600000);//##remove##
 }
 //process.on('SIGINT', function () {
   //console.log('Got SIGINT.  Press Control-D to exit.');
@@ -141,8 +141,8 @@ app.post('/__jsonrpc',function(req,res){
             //xunlei.upload(params.file);
         }else if(method=='baidu.upload'){
             baidu.upload(params.file);
-        }else if(method=='weibo.upload'){
-            httptask.queue(weibo.upload,[params.file]);
+        }else if(method=='vdisk.upload'){
+            httptask.queue(vdisk.upload,[params.file]);
             //weibo.upload(params.file);
         }else if(method=='httptask.deleteTask'){
             var ret=httptask.deleteTask(params.taskid);
@@ -176,16 +176,30 @@ app.configure('production', function(){
 
 
 app.get('/info',function(req,res){
-    var _conf={http_url:'http://localhost/',ssh_url:'',proxy_url:'localhost'};
+    var _conf={ini:ut.ini.toText(),http_url:'http://localhost/',ssh_url:'',proxy_url:'localhost'};
     if(SERVER_PORT){
         var _env=require('/home/dotcloud/environment.json');
         _conf={
         http_url:_env.DOTCLOUD_WWW_HTTP_URL,
         ssh_url:_env.DOTCLOUD_WWW_SSH_URL.replace('ssh://',''),
-        proxy_url:_env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://','')
+        proxy_url:_env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://',''),
+        ini: ut.ini.toText()
         }
     }
     res.render('info',{conf:_conf});
+});
+app.post('/info',function(req,res){
+    var content=req.body.ini;
+    if(content&&content.length>0){
+        try{
+            console.log(content);
+            //ut.mergeIni(content);
+        }catch(err){
+            console.error(err);
+        }
+    }
+    res.redirect('/info');
+
 });
 
 var httpserver=http.createServer(app);
@@ -216,7 +230,6 @@ var ttyapp=tty.createServer({
     app:app,
     server:httpserver,
 	shell:'bash',
-    cwd:'~/data/downloads',
 	port: PORT
 });
 ttyapp.listen();
