@@ -11,8 +11,12 @@ block content
       pre
         |ssh: #{conf.ssh_url}
         |proxy: #{conf.proxy_url}
-        |goagent: #{conf.http_url}agentfetch
+        |goagent: #{conf.http_url}agentfetch 
+        a(href='/goagent/proxy.ini') [proxy.ini]
+        | 
         |wallproxy: #{conf.http_url}wallfetch
+        a(href='/wallproxy/proxy.ini') [proxy.ini]
+        a(href='/wallproxy/gui.ini') [gui.ini]
     div.alert.alert-info
       form#form1(method='post')
         strong y2proxy.ini
