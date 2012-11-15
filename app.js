@@ -12,6 +12,7 @@ var express = require('express')
   , util =require('util');
 
 var ut=require('./lib/utility.js')
+  , logger=ut.logger
   ,dir=require('./lib/directory')
   , httptask = require('./lib/httptask')
   , xunlei = require('./lib/xunlei')
@@ -21,9 +22,9 @@ var ut=require('./lib/utility.js')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
   //, dotcloud = require('./lib/dotcloud') //##remove##
-  , _9gal = require('./lib/9gal.js') //##remove##
-  , _115 = require('./lib/115.js') //##remove##
-  , _weibo = require('./lib/weibo.js') //##remove##
+  , _9gal = require('./lib/9gal.js') 
+  , _115 = require('./lib/115.js') 
+  , _weibo = require('./lib/weibo.js') 
   , forward = require('./lib/forward');
 
 //var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
@@ -40,18 +41,18 @@ if(SERVER_PORT){
     process.env.SERVER=SERVER_PORT;
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
-        console.warn(new Date()+' proxyServer is exiting....');
+        logger.warn('proxyServer is exiting....');
         ut.Cookie.save();
         ut.ini.write();
         process.exit(1);//if return 0,supervisor won't respawn proccess
     });
     function _watchfile(){
     fs.watchFile(ut.Cookie.file,function(cur,prev){
-        util.log('reloading '+ut.Cookie.file);
+        logger.log('reloading '+ut.Cookie.file);
         ut.Cookie.load();
     });
     fs.watchFile(ut.ini.file,function(cur,prev){
-        util.log('reloading '+ut.ini.file);
+        logger.log('reloading '+ut.ini.file);
         ut.ini.load();
     });
     }
@@ -64,7 +65,7 @@ if(SERVER_PORT){
         setTimeout(_watchfile,15000);
     },3600000);
     //execute every 10mins
-    setInterval(function(){ _9gal.takeBonus();_115.takeBonus();_weibo.takeBonus();},600000);//##remove##
+    setInterval(function(){ _9gal.takeBonus();_115.takeBonus();_weibo.takeBonus();},600000);
 }
 //process.on('SIGINT', function () {
   //console.log('Got SIGINT.  Press Control-D to exit.');
@@ -159,8 +160,8 @@ app.post('/__jsonrpc',function(req,res){
         }
         res.json({jsonrpc:'2.0',id:1,result:'success'});
     }catch(err){
-        console.log(err.message);
-        console.log(err.stack);
+        console.warn(err.message);
+        console.warn(err.stack);
         res.json({jsonrpc:'2.0',id:1,error:{message:err.message}});
     }
 });
@@ -192,8 +193,8 @@ app.post('/info',function(req,res){
     var content=req.body.ini;
     if(content&&content.length>0){
         try{
-            console.log(content);
-            //ut.mergeIni(content);
+            //console.log(content);
+            ut.mergeIni(content);
         }catch(err){
             console.error(err);
         }
