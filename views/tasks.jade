@@ -10,34 +10,35 @@ block nav.tasks
 block content
   div.container
     div#accordion1.accordion.span9
+      if actives.length > 0
+        div.accordion-group
+          div.accordion-heading
+            a.accordion-toggle(data-toggle='collapse',data-parent='#accordion1',href='#activetask')
+              i.icon-chevron-down
+              b active tasks
+          div#activetask.accordion-body.collapse.in
+            div.accordion-inner
+              for t in actives
+                div.row
+                  div.span9 #{t.id}.#{t.file.name}
+                    div.row
+                      div.span5
+                        - var pencentage=(100*t.downloaded/t.file.size).toFixed(0);var barclass='active';if(t.status<0)barclass='progress-warning';
+                          span.badge(style="padding:3px; float: left; width: 25px; text-align: center;") #{pencentage}%
+                          div.progress.progress-striped(class=barclass)
+                            div.bar(style='width:#{pencentage}% ;color:rgb(64,0,128)') #{t.getStatus()} 
+                      div.span1 #{t.getFileSize()}
+                      div.span1 #{t.info.speed}k/s
+                      div.span2
+                        - var iconClass='icon-arrow-down';if(t.status==2){iconClass='icon-arrow-up';}else if(t.status<0){iconClass='icon-minus-sign';}
+                          i(class=iconClass)
+                        |#{t.leftedTime()}
       div.accordion-group
         div.accordion-heading
-          a.accordion-toggle(data-toggle='collapse',data-parent='#accordion1',href='#collapseOne')
-            i.icon-chevron-down
-            b active tasks
-        div#collapseOne.accordion-body.collapse.in
-          div.accordion-inner
-            for t in actives
-              div.row
-                div.span9 #{t.id}.#{t.file.name}
-                  div.row
-                    div.span5
-                      - var pencentage=(100*t.downloaded/t.file.size).toFixed(0);var barclass='active';if(t.status<0)barclass='progress-warning';
-                        span.badge(style="padding:3px; float: left; width: 25px; text-align: center;") #{pencentage}%
-                        div.progress.progress-striped(class=barclass)
-                          div.bar(style='width:#{pencentage}% ;color:rgb(64,0,128)') #{t.getStatus()} 
-                    div.span1 #{t.getFileSize()}
-                    div.span1 #{t.info.speed}k/s
-                    div.span2
-                      - var iconClass='icon-arrow-down';if(t.status==2){iconClass='icon-arrow-up';}else if(t.status<0){iconClass='icon-minus-sign';}
-                        i(class=iconClass)
-                      |#{t.leftedTime()}
-      div.accordion-group
-        div.accordion-heading
-          a.accordion-toggle(data-toggle='collapse',data-parent='#accordion1',href='#collapseTwo') 
+          a.accordion-toggle(data-toggle='collapse',data-parent='#accordion1',href='#finishtask') 
             i.icon-chevron-down
             b finished tasks
-        div#collapseTwo.accordion-body.collapse
+        div#finishtask.accordion-body.collapse(class=(actives.length==0?'in':''))
           div.accordion-inner
             for t in finishes
               div.row

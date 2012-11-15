@@ -216,6 +216,7 @@ var ttyapp=tty.createServer({
     app:app,
     server:httpserver,
 	shell:'bash',
+    cwd:'~/data/downloads',
 	port: PORT
 });
 ttyapp.listen();
