@@ -9,12 +9,14 @@ block content
     div.alert.alert-info
       strong host's info
       pre
-        |ssh: #{conf.ssh_url}
+        |ssh: #{conf.ssh_url} 
+        a(href='/dotcloud_cli/dotcloud.key') [dotcloud.key]
+        | 
         |proxy: #{conf.proxy_url}
         |goagent: #{conf.http_url}agentfetch 
         a(href='/goagent/proxy.ini') [proxy.ini]
         | 
-        |wallproxy: #{conf.http_url}wallfetch
+        |wallproxy: #{conf.http_url}wallfetch 
         a(href='/wallproxy/proxy.ini') [proxy.ini]
         a(href='/wallproxy/gui.ini') [gui.ini]
     div.alert.alert-info
