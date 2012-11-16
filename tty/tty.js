@@ -442,7 +442,7 @@ Session.prototype.handleCreate = function(cols, rows, func) {
 
   var _env={}; //dotcloud
   for (var k in process.env){_env[k]=process.env[k];}//dotcloud
-  _env['SETTINGS_FLAVOR']=Date.now();//dotcloud
+  _env['DOTCLOUD_LOCAL_CONFIG']='.local';//dotcloud
   term = pty.fork(conf.shell, conf.shellArgs, {
     name: conf.termName,
     cols: cols,

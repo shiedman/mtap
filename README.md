@@ -1,7 +1,18 @@
-dotcloud
-========
+node.js@dotcloud
+================
+1. proxy
+http/https/socks5
+goagent/wallproxy
 
-node.js实现的http/https/socks5代理
-node.js实现的goagent/wallproxy
+2. modified aria2c, port mapping mechanize changed
 
-aria2c的dotcloud端口映射
+3.dotcloud/ui/config.py
+class GlobalConfig(object):
+    def __init__(self):
+        self.dir = os.path.expanduser('~/.dotcloud_cli')
+        if os.environ.get('DOTCLOUD_LOCAL_CONFIG'):
+            if not os.path.exists('.local'):os.mkdir('.local', 0700)
+            self.dir='.local'
+        self.path = self.path_to('config')
+        self.key = self.path_to('dotcloud.key')
+        self.load()

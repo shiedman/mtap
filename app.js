@@ -224,7 +224,8 @@ var ttyapp=tty.createServer({
     app:app,
     server:httpserver,
 	shell:'bash',
-	port: PORT
+	port: PORT,
+    cwd: '/home/dotcloud/data/proj'
 });
 ttyapp.listen();
 }else{
