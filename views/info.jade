@@ -10,7 +10,7 @@ block content
       strong host's info
       pre
         |ssh: #{conf.ssh_url} 
-        a(href='/dotcloud_cli/dotcloud.key') [dotcloud.key]
+        a(href='/dotcloud.ppk') [dotcloud.ppk]
         | 
         |proxy: #{conf.proxy_url}
         |goagent: #{conf.http_url}agentfetch 
@@ -19,8 +19,9 @@ block content
         |wallproxy: #{conf.http_url}wallfetch 
         a(href='/wallproxy/proxy.ini') [proxy.ini]
         a(href='/wallproxy/gui.ini') [gui.ini]
-    div.alert.alert-info
+    //-div.alert.alert-info
       form#form1(method='post')
+        a.btn.btn-mini.btn-primary(href='/y2proxy_ini') 样本文件
         strong y2proxy.ini
-        input.btn.btn-primary(type='submit',value='save') 
+        input.btn.btn-primary(type='submit',value='保存') 
         textarea#ini(name='ini',rows='20',style='width:100%')=conf.ini

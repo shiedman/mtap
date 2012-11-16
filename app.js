@@ -32,8 +32,8 @@ var logLevel='dev'
   , PORT=80
   , ROOT='d:/home';
 
-ut.Cookie.load();ut.ini.load();
 //setInterval(function(){ _9gal.takeBonus();},15000);//##remove##
+ut.Cookie.load();ut.ini.load();
 if(SERVER_PORT){
     logLevel='tiny',PORT=SERVER_PORT;
     ROOT='/home/dotcloud/data';
@@ -172,13 +172,19 @@ app.configure('production', function(){
 });
 
 
+
+app.get('/faq',function(req,res){
+    var _info={'hostname':process.env.DOTCLOUD_WWW_SSH_HOST,ssh_port:process.env.DOTCLOUD_WWW_SSH_PORT,appname:process.env.DOTCLOUD_PROJECT};
+    res.render('faq',{info:_info});
+});
+
 app.get('/info',function(req,res){
     var _conf={ini:ut.ini.toText(),http_url:'http://localhost/',ssh_url:'',proxy_url:'localhost'};
     if(SERVER_PORT){
         var _env=require('/home/dotcloud/environment.json');
         _conf={
         http_url:_env.DOTCLOUD_WWW_HTTP_URL,
-        ssh_url:_env.DOTCLOUD_WWW_SSH_URL.replace('ssh://',''),
+        ssh_url:_env.DOTCLOUD_WWW_SSH_URL.replace('ssh://dotcloud@',''),
         proxy_url:_env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://',''),
         ini: ut.ini.toText()
         }
@@ -198,7 +204,23 @@ app.post('/info',function(req,res){
     res.redirect('/info');
 
 });
-
+app.get('/y2proxy_ini',function(req,res){
+    var headers={};
+    var proxy_response={filename:'y2proxy'};
+    var userAgent=req.headers['user-agent'];
+    if(userAgent)userAgent=userAgent.toLowerCase();
+    if(userAgent.indexOf('msie')>=0 || userAgent.indexOf('chrome')>=0){
+        headers['Content-Disposition']='attachment; filename='+encodeURIComponent(proxy_response.filename+'.ini');
+    }else if(userAgent.indexOf('firefox')>=0){
+        headers['Content-Disposition']='attachment; filename*="utf8\'\''+encodeURIComponent(proxy_response.filename+'.ini')+'"';
+    } else{
+        headers['Content-Disposition']='attachment; filename='+(proxy_response.filename+'.ini');
+    }
+    var s='[115]\r\nbober@163.com=121345\r\n\r\n[9gal]\r\nbaka=983jdka\r\n\r\n[xunlei]\r\nnh3@163.com=uh3dade\r\n\r\n[vdisk]\r\nyuri@163.com=jkea212cjkd\r\n'
+    headers['Content-Length']=s.length;
+    res.writeHead(200,headers);
+    res.end(s);
+});
 var httpserver=http.createServer(app);
 httpserver.on('connect', function(req, cltSocket, head) {
     var srvUrl = urlparse('http://' + req.url);

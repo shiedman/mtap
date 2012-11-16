@@ -1,0 +1,62 @@
+extends layout
+
+block nav.faq
+  li.active
+    a(href='/faq') faq 
+
+block content
+  div.container
+    div
+      p.lead 一、如何重启服务器？
+      p 登录服务器后（网页登录或者ssh登录)，敲入命令: www.reboot
+    div
+      p.lead 二、下载文件保存在哪里？
+      p 
+        | 下载的文件存放在: <a target='_blank' href='/downloads/'>/home/dotcloud/data/downloads/</a>
+    div
+      p.lead 三、如何删除下载任务？
+      p 登录服务器后（网页登录或者ssh登录)，敲入命令: rpc del <任务id>。任务id就是下载文件名前面的序号。
+    div
+      p.lead
+        | 四、<a href='http://code.google.com/p/wallproxy-plus'>wallproxy</a>如何配置
+      ol
+        li 下载wallproxy 2.1.3+: 
+          a(href='http://goo.gl/dFtij') http://goo.gl/dFtij
+        li 解压文件，进入local目录
+        li 下载
+          a(href='/wallproxy/proxy.ini') proxy.ini
+          |和
+          a(href='/wallproxy/gui.ini') gui.ini
+          |，覆盖local目录的2个同名文件。
+    div
+      p.lead
+        | 五、<a href='http://code.google.com/p/goagent'>goagent</a>如何配置
+      ol
+        li 下载goagent 2.1.5+: 
+          a(href='http://goo.gl/sxgfB') http://goo.gl/sxgfB
+        li 解压文件，进入local目录
+        li 下载
+          a(href='/goagent/proxy.ini') proxy.ini
+          |，覆盖local目录的同名文件。
+    div
+      p.lead 六、如何通过putty登录服务器
+      ol
+        li putty下载页面: http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+          br
+          |下载putty.exe: http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe
+        li 下载本服务器putty密钥: 
+          a(href='/dotcloud.ppk') dotcloud.ppk
+        li 运行putty.exe
+          div
+            img(src='/img/putty1.PNG')
+            pre(style='width:400px')
+              |Host Name: 
+              strong #{info.hostname}
+              | 
+              |Port: 
+              strong #{info.ssh_port}
+              | 
+              |Saved Sessions: 
+              strong #{info.appname}
+            img(src='/img/putty2.PNG')
+        li 保存后，双击<strong>#{info.appname}</strong>即可ssh登录本服务器
