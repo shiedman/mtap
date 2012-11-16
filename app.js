@@ -8,12 +8,11 @@ var express = require('express')
   , net = require('net')
   , fs = require('fs')
   , path = require('path')
-  , urlparse = require('url').parse
-  , util =require('util');
+  , urlparse = require('url').parse;
 
 var ut=require('./lib/utility.js')
   , logger=ut.logger
-  ,dir=require('./lib/directory')
+  , dir=require('./lib/directory')
   , httptask = require('./lib/httptask')
   , xunlei = require('./lib/xunlei')
   , baidu = require('./lib/baidu')
@@ -38,7 +37,6 @@ ut.Cookie.load();ut.ini.load();
 if(SERVER_PORT){
     logLevel='tiny',PORT=SERVER_PORT;
     ROOT='/home/dotcloud/data';
-    process.env.SERVER=SERVER_PORT;
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
         logger.warn('proxyServer is exiting....');
@@ -57,19 +55,21 @@ if(SERVER_PORT){
     });
     }
     _watchfile();
-    //execute every 1 hour
+    //execute every 30mins
     setInterval(function(){
         fs.unwatchFile(ut.Cookie.file);
         fs.unwatchFile(ut.ini.file);
         setTimeout(function(){ut.Cookie.save();ut.ini.write();},5000);
         setTimeout(_watchfile,15000);
-    },3600000);
+    },1800000);
     //execute every 10mins
     setInterval(function(){ _9gal.takeBonus();_115.takeBonus();_weibo.takeBonus();},600000);
 }
-//process.on('SIGINT', function () {
-  //console.log('Got SIGINT.  Press Control-D to exit.');
-//});
+/*
+ *process.on('SIGINT', function () {
+ *  console.log('Got SIGINT.  Press Control-D to exit.');
+ *});
+ */
 
 
 var app = express();
@@ -108,15 +108,11 @@ app.configure(function(){
   app.locals.pretty=true;
   setInterval(function(){ httptask.updateTask();},30000);
 });
-//var auth=express.basicAuth('admin','supass');
 /**
+var auth=express.basicAuth('admin','supass');
 app.get(/^\/_upload\/(.+)$/,function(req,res){
     try{
-        //console.log(req.params[0]);
         var filepath=path.join(ROOT,req.params[0]);
-        console.log(filepath);
-        kuai.upload(filepath);
-        console.log('dispatching to ',req.params[0]);
         res.send('uploading....');
     }catch(err){
         res.send('upload failed:',err.message);
@@ -206,10 +202,10 @@ app.post('/info',function(req,res){
 var httpserver=http.createServer(app);
 httpserver.on('connect', function(req, cltSocket, head) {
     var srvUrl = urlparse('http://' + req.url);
-    util.log('CONNECT: '+req.url);
+    console.log('CONNECT: %s',req.url);
     var srvSocket = net.connect(srvUrl.port, srvUrl.hostname, function() {
         cltSocket.write('HTTP/1.1 200 Connection Established\r\n' +
-            'Proxy-agent: Node-Proxy\r\n\r\n');
+            'Proxy-agent: y2proxy\r\n\r\n');
         if(head&&head.length>0)srvSocket.write(head);
         srvSocket.pipe(cltSocket);
         cltSocket.pipe(srvSocket);
@@ -217,12 +213,9 @@ httpserver.on('connect', function(req, cltSocket, head) {
     srvSocket.on('error',function (err){
         console.error(err);
     });
-    //srvSocket.on('timeout',function(){
-        //console.error('connection timeout!!!');
-    //});
 });
 httpserver.on('clientError',function(err){
-    util.log('clientError: '+err.message);
+    console.log('clientError: %s',err.message);
 });
 
 if(SERVER_PORT){
