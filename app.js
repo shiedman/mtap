@@ -26,33 +26,29 @@ var ut=require('./lib/utility.js')
   , _weibo = require('./lib/weibo.js') 
   , forward = require('./lib/forward');
 
-//var SERVER_PORT=process.env.PORT_OTHER||process.env.PORT_WWW;
-var SERVER_PORT=process.env.PORT_WWW;
-var logLevel='dev'
-  , PORT=80
-  , ROOT='d:/home';
-
-//setInterval(function(){ _9gal.takeBonus();},15000);//##remove##
 ut.Cookie.load();ut.ini.load();
-if(SERVER_PORT){
-    logLevel='tiny',PORT=SERVER_PORT;
-    ROOT='/home/dotcloud/data';
+
+var logLevel='dev' , PORT=80 , ROOT='d:/home';
+var SERVER=process.env.PORT_WWW;
+if(SERVER){
+    logLevel='tiny',PORT=SERVER, ROOT='/home/dotcloud/data';
+//process.on('SIGINT', function () { console.log(' Press Control-D to exit.'); }); 
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
-        logger.warn('proxyServer is exiting....');
+        logger.warn('Server is exiting....');
         ut.Cookie.save();
         ut.ini.write();
         process.exit(1);//if return 0,supervisor won't respawn proccess
     });
     function _watchfile(){
-    fs.watchFile(ut.Cookie.file,function(cur,prev){
-        logger.log('reloading '+ut.Cookie.file);
-        ut.Cookie.load();
-    });
-    fs.watchFile(ut.ini.file,function(cur,prev){
-        logger.log('reloading '+ut.ini.file);
-        ut.ini.load();
-    });
+        fs.watchFile(ut.Cookie.file,function(cur,prev){
+            logger.log('File Changed: '+ut.Cookie.file);
+            ut.Cookie.load();
+        });
+        fs.watchFile(ut.ini.file,function(cur,prev){
+            logger.log('File Changed: '+ut.ini.file);
+            ut.ini.load();
+        });
     }
     _watchfile();
     //execute every 30mins
@@ -64,37 +60,31 @@ if(SERVER_PORT){
     },1800000);
     //execute every 10mins
     setInterval(function(){ _9gal.takeBonus();_115.takeBonus();_weibo.takeBonus();},600000);
+    //execute every 30s
+    setInterval(function(){ httptask.updateTask();},30000);
 }
-/*
- *process.on('SIGINT', function () {
- *  console.log('Got SIGINT.  Press Control-D to exit.');
- *});
- */
-
 
 var app = express();
-
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.enable('trust proxy');
+  //app.locals.pretty=true;
 
 //http://www.senchalabs.org/connect/middleware-logger.html
   app.use(express.logger(logLevel));
 
-  //app.use(xunlei.logRequest);
-  //app.use(baidu.logRequest);
+  //http proxy request
   app.use(function(req,res,next){
       if(req.url.substring(0,4)=='http'){ proxy.handle(req,res); }else{ next();}
   });
+  //aria2 rpc request
   app.use('/jsonrpc_',function (req,res,next){
       forward('localhost',6800,'/jsonrpc'+req.url.substring(1))(req,res);
   });
   app.use(express.favicon());
   app.use(express.bodyParser());
   //app.use(express.methodOverride());
-
-
   //app.use(express.cookieParser('nosecret'));
   //app.use(express.cookieSession());
   //app.use(express.session());
@@ -103,10 +93,9 @@ app.configure(function(){
   app.use(express.static(path.join(__dirname, 'bootstrap')));
   app.use(express.static(path.join(__dirname, 'static')));
   app.use(express.static(ROOT));
-  app.use(dir.directory(ROOT));
 
-  app.locals.pretty=true;
-  setInterval(function(){ httptask.updateTask();},30000);
+  //file listing
+  app.use(dir.directory(ROOT));
 });
 /**
 var auth=express.basicAuth('admin','supass');
@@ -119,9 +108,6 @@ app.get(/^\/_upload\/(.+)$/,function(req,res){
     }
 });
 */
-app.get('/tasks',httptask.viewTasks);
-app.post('/agentfetch',goagent.serve);
-app.post('/wallfetch',wallproxy.serve);
 
 app.post('/__jsonrpc',function(req,res){
     var method=req.body.method;
@@ -172,6 +158,9 @@ app.configure('production', function(){
 });
 
 
+app.get('/tasks',httptask.viewTasks);
+app.post('/agentfetch',goagent.serve);
+app.post('/wallfetch',wallproxy.serve);
 
 app.get('/faq',function(req,res){
     var ssh_host=process.env.DOTCLOUD_WWW_SSH_HOST;
@@ -182,23 +171,21 @@ app.get('/faq',function(req,res){
 });
 
 app.get('/info',function(req,res){
-    var _conf={ini:ut.ini.toText(),http_url:'http://localhost/',ssh_url:'',proxy_url:'localhost'};
-    if(SERVER_PORT){
-        var _env=require('/home/dotcloud/environment.json');
-        _conf={
-        http_url:_env.DOTCLOUD_WWW_HTTP_URL,
-        ssh_url:_env.DOTCLOUD_WWW_SSH_URL.replace('ssh://dotcloud@',''),
-        proxy_url:_env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://',''),
+    var env={
+        http_url:process.env.DOTCLOUD_WWW_HTTP_URL,
+        ssh_url:process.env.DOTCLOUD_WWW_SSH_URL.replace('ssh://dotcloud@',''),
+        proxy_url:process.env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://',''),
         ini: ut.ini.toText()
-        }
     }
-    res.render('info',{conf:_conf});
+    if(!SERVER){
+        env={ini:ut.ini.toText(),http_url:'http://localhost/',ssh_url:'localhost',proxy_url:'localhost'};
+    }
+    res.render('info',{conf:env});
 });
 app.post('/info',function(req,res){
     var content=req.body.ini;
     if(content&&content.length>0){
         try{
-            //console.log(content);
             ut.mergeIni(content);
         }catch(err){
             console.error(err);
@@ -207,6 +194,8 @@ app.post('/info',function(req,res){
     res.redirect('/info');
 
 });
+
+/*
 app.get('/y2proxy_ini',function(req,res){
     var headers={};
     var proxy_response={filename:'y2proxy'};
@@ -224,6 +213,9 @@ app.get('/y2proxy_ini',function(req,res){
     res.writeHead(200,headers);
     res.end(s);
 });
+*/
+
+/** boot server **/
 var httpserver=http.createServer(app);
 httpserver.on('connect', function(req, cltSocket, head) {
     var srvUrl = urlparse('http://' + req.url);
@@ -240,22 +232,21 @@ httpserver.on('connect', function(req, cltSocket, head) {
     });
 });
 httpserver.on('clientError',function(err){
-    console.log('clientError: %s',err.message);
+    console.error('clientError: %s',err.message);
 });
 
-if(SERVER_PORT){
-var tty=require('./tty/tty.js');
-var ttyapp=tty.createServer({
-    app:app,
-    server:httpserver,
-	shell:'bash',
-	port: PORT,
-    cwd: '/home/dotcloud/data'
-});
-ttyapp.listen();
+if(SERVER){
+    var tty=require('./tty/tty.js');
+    var ttyapp=tty.createServer({
+        app:app,
+        server:httpserver,
+        shell:'bash',
+        port: PORT,
+        cwd: '/home/dotcloud/data/downloads'
+    });
+    ttyapp.listen();
 }else{
-
-httpserver.listen(PORT, function(){
-  console.log("Express server listening on port %s",PORT);
-});
+    httpserver.listen(PORT, function(){
+      console.log("Express server listening on port %s",PORT);
+    });
 }
