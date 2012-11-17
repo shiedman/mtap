@@ -4,9 +4,9 @@ html
     meta(charset='utf-8')
     title y2proxy_
     link(rel='stylesheet', href='/css/bootstrap.min.css')
-    block head 
     style
         body{padding-top: 40px;}
+    block head 
   body
     div.navbar.navbar-inverse.navbar-fixed-top
         div.navbar-inner
@@ -30,6 +30,9 @@ html
                         block nav.info
                           li
                               a(href='/info') info 
+                        block nav.faq
+                          li
+                              a(href='/faq') faq
 
     block content
     block foot

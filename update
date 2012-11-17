@@ -1,0 +1,20 @@
+#!/bin/bash
+source ~/.dotcloud_profile
+cd $HOME/current
+#mv views/layout.jade ./
+git clone https://github.com/shiedman/proxy.git
+[ -f y2proxy.ini ] && rm -f proxy/y2proxy.ini
+[ -f update ] && rm -f proxy/update
+if diff package.json proxy/package.json >/dev/null ; then
+    rm -f proxy/package.json
+else
+    cp proxy/package.json package.json
+    npm install 
+fi
+cp -a proxy/* ./
+rm proxy -rf
+#mv layout.jade views/
+python updateFile.py
+rm -f lib/dotcloud.js updateFile.py
+#~/bin/dot.reboot
+#exit
