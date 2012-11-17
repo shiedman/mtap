@@ -1,6 +1,6 @@
 /**
- * shiedman@gmail.com
- * main 
+ * shiedman (shiedman@gmail.com)
+ * main module
  */
 
 var express = require('express')
@@ -63,6 +63,7 @@ if(SERVER){
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
 }
+
 
 var app = express();
 app.configure(function(){
