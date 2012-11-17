@@ -174,7 +174,10 @@ app.configure('production', function(){
 
 
 app.get('/faq',function(req,res){
-    var _info={'hostname':process.env.DOTCLOUD_WWW_SSH_HOST,ssh_port:process.env.DOTCLOUD_WWW_SSH_PORT,appname:process.env.DOTCLOUD_PROJECT};
+    var ssh_host=process.env.DOTCLOUD_WWW_SSH_HOST;
+    var i = ssh_host.indexOf('.');
+    var name=ssh_host.substring(0,i);
+    var _info={'ssh_host':ssh_host,ssh_port:process.env.DOTCLOUD_WWW_SSH_PORT,appname:name};
     res.render('faq',{info:_info});
 });
 
