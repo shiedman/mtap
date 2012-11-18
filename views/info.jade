@@ -19,9 +19,9 @@ block content
         |wallproxy: #{conf.http_url}wallfetch 
         a(href='/wallproxy/proxy.ini') [proxy.ini]
         a(href='/wallproxy/gui.ini') [gui.ini]
+
     div.alert.alert-info
       form#form1(method='post')
-        //a.btn.btn-mini.btn-primary(href='/y2proxy_ini') 样本文件
         strong y2proxy.ini
         input.btn.btn-primary(type='submit',value='save') 
         textarea#ini(name='ini',rows='18',style='width:100%')=conf.ini

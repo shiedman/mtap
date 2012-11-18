@@ -8,6 +8,7 @@ var express = require('express')
   , net = require('net')
   , fs = require('fs')
   , path = require('path')
+  , wrench = require('wrench')
   , urlparse = require('url').parse;
 
 var ut=require('./lib/utility.js')
@@ -66,11 +67,12 @@ if(SERVER){
 
 
 var app = express();
+var admin={user:'',pass:''};
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.enable('trust proxy');
-  //app.locals.pretty=true;
+  app.locals.pretty=true;
 
 //http://www.senchalabs.org/connect/middleware-logger.html
   app.use(express.logger(logLevel));
@@ -89,26 +91,56 @@ app.configure(function(){
   //app.use(express.cookieParser('nosecret'));
   //app.use(express.cookieSession());
   //app.use(express.session());
-  app.use(app.router);
 
+  //if(SERVER)app.use(express.compress());
   app.use(express.static(path.join(__dirname, 'bootstrap')));
+
+  var adminFile=path.join(__dirname,'admin.info');
+  var adminExist=fs.existsSync(adminFile);
+  if(adminExist){ fs.readFile(adminFile,'utf-8',function(err,data){admin=JSON.parse(data);});}
+  app.use(function(req,res,next){
+      if(req.method=='POST'&&req.path=='/admin'){
+          user=req.body.user0;if(user)user=user.trim();
+          pass1=req.body.pass1;if(pass1)pass1=pass1.trim();
+          pass2=req.body.pass2;if(pass2)pass2=pass2.trim();
+          if(pass1!=pass2){
+              return res.render('admin',{admin:admin,error:'password not matched !!!'});
+          }
+          admin.user=user;
+          admin.pass=pass1;
+          //console.log('user=%s,pass=%s',user,pass);
+          fs.writeFile(adminFile,JSON.stringify(admin));
+          adminExist=true;
+          return res.redirect('/info');
+      }
+      //if(admin.user)req.user=admin.user;
+      //setup admin user and pass
+      if(!adminExist){
+          res.render('admin',{admin:admin});
+      }else{
+          next();
+      }
+  });
+  var auth=express.basicAuth(function(user,pass){
+      return user==admin.user&&pass==admin.pass;
+  },'y2proxy');
+  app.use(function(req,res,next){
+      if(['/info','/faq','/aria2','/admin','/tty'].indexOf(req.path)>=0 ||
+          req.path.indexOf('/delete')==0){
+          auth(req,res,next);
+      }else{
+          next();
+      }
+  });
+
   app.use(express.static(path.join(__dirname, 'static')));
   app.use(express.static(ROOT));
 
   //file listing
   app.use(dir.directory(ROOT));
+
+  app.use(app.router);
 });
-/**
-var auth=express.basicAuth('admin','supass');
-app.get(/^\/_upload\/(.+)$/,function(req,res){
-    try{
-        var filepath=path.join(ROOT,req.params[0]);
-        res.send('uploading....');
-    }catch(err){
-        res.send('upload failed:',err.message);
-    }
-});
-*/
 
 app.post('/__jsonrpc',function(req,res){
     var method=req.body.method;
@@ -162,9 +194,12 @@ app.configure('production', function(){
 app.get('/tasks',httptask.viewTasks);
 app.post('/agentfetch',goagent.serve);
 app.post('/wallfetch',wallproxy.serve);
+app.get('/admin',function(req,res){
+    res.render('admin',{admin:admin}); 
+});
 
 app.get('/faq',function(req,res){
-    var ssh_host=process.env.DOTCLOUD_WWW_SSH_HOST;
+    var ssh_host=process.env.DOTCLOUD_WWW_SSH_HOST||'demo-nana.dotcloud.com';
     var i = ssh_host.indexOf('.');
     var name=ssh_host.substring(0,i);
     var _info={'ssh_host':ssh_host,ssh_port:process.env.DOTCLOUD_WWW_SSH_PORT,appname:name};
@@ -172,14 +207,14 @@ app.get('/faq',function(req,res){
 });
 
 app.get('/info',function(req,res){
-    var env={
-        http_url:process.env.DOTCLOUD_WWW_HTTP_URL,
-        ssh_url:process.env.DOTCLOUD_WWW_SSH_URL.replace('ssh://dotcloud@',''),
-        proxy_url:process.env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://',''),
-        ini: ut.ini.toText()
-    }
-    if(!SERVER){
-        env={ini:ut.ini.toText(),http_url:'http://localhost/',ssh_url:'localhost',proxy_url:'localhost'};
+    var env={ini:ut.ini.toText(),http_url:'http://localhost/',ssh_url:'localhost',proxy_url:'localhost'};
+    if(SERVER){
+        env={
+            http_url:process.env.DOTCLOUD_WWW_HTTP_URL,
+            ssh_url:process.env.DOTCLOUD_WWW_SSH_URL.replace('ssh://dotcloud@',''),
+            proxy_url:process.env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://',''),
+            ini: ut.ini.toText()
+        }
     }
     res.render('info',{conf:env});
 });
@@ -194,6 +229,31 @@ app.post('/info',function(req,res){
     }
     res.redirect('/info');
 
+});
+app.get(/^\/delete\/(.+)$/,function(req,res){
+    try{
+        var filename=req.params[0];
+        var filepath=path.join(ROOT,filename);
+        var fstat=fs.lstatSync(filepath);
+        var href='/';
+        if(fstat.isDirectory()){
+            //fs.rmdirSync(filepath);
+            wrench.rmdirSyncRecursive(filepath);
+            //href=path.join('/'+filename,'..');
+            href=path.dirname('/'+filename);
+            logger.info('delete dir: %s',filepath);
+        }else if(fstat.isFile()){
+            fs.unlinkSync(filepath);
+            href=path.dirname('/'+filename);
+            logger.info('delete file: %s',filepath);
+        }
+        res.redirect(href);
+    }catch(err){
+        logger.error(err);
+        var msg='delete faild: '+err.message;
+        res.writeHead(500,{'Content-Type':'text/plain;charset=utf-8','Content-Length':msg.length});
+        res.end(msg);
+    }
 });
 
 /*

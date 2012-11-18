@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  div.container
+    div(style='padding-top:40px')
+      form.form-horizontal(action='/admin',method='post')
+        div.control-group
+          label.control-label(for='user0') Username:
+          div.controls
+            input#user0(value='#{admin.user}',name='user0',type='text',placeholder='username')
+        div.control-group
+          label.control-label(for='pass1') Password:
+          div.controls
+            input#pass1(name='pass1',type='password',placeholder='password')
+        div.control-group
+          label.control-label(for='pass2') Re-enter Password:
+          div.controls
+            input#pass2(name='pass2',type='password',placeholder='password')
+            if locals.error
+              div(style='color: #b94a48;') #{error}
+        div.control-group
+          div.controls
+            button.btn(type='submit') setup

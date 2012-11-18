@@ -19,12 +19,14 @@ block content
                     th name
                     th size
                     th date
+                    th &nbsp;
             tbody
                 tr
                     td
                         a(href=p)
                             i.icon-arrow-up
                             |&nbsp;..
+                    td &nbsp;
                     td &nbsp;
                     td &nbsp;
                 each f,i in files
@@ -34,9 +36,7 @@ block content
                             a(href=f.href) #{f.filename}
                         td=f.size
                         td=f.date
-                        //
-                          td(style="padding-right:0px;padding-left:0px;")
-                              if f.up
-                                  a(href=f.uploadURL)
-                                      i.icon-upload
-                                      |UP
+                        td(style="padding-right:0px;padding-left:0px;")
+                          if author
+                            a(href='/delete'+f.href)
+                                i.icon-remove

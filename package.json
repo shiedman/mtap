@@ -14,6 +14,7 @@
     "iconv":"1.x",
     "jade": "0.27.x",
     "tracer":"0.5.x",
+    "wrench":"1.x",
     "tough-cookie":"0.9.x",
     "socket.io": "0.9.x",
     "pty.js": "0.1.x"
