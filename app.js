@@ -69,7 +69,7 @@ if(SERVER){
 var app = express();
 var admin={user:'',pass:''};
 app.configure(function(){
-  app.set('views', __dirname + '/views');
+  app.set('views', path.join(__dirname,'views'));
   app.set('view engine', 'jade');
   app.enable('trust proxy');
   app.locals.pretty=true;
@@ -79,7 +79,7 @@ app.configure(function(){
 
   //http proxy request
   app.use(function(req,res,next){
-      if(req.url.substring(0,4)=='http'){ proxy.handle(req,res); }else{ next();}
+      if(req.url.substring(0,4)=='http'){proxy.handle(req,res); }else{ next();}
   });
   //aria2 rpc request
   app.use('/jsonrpc_',function (req,res,next){
