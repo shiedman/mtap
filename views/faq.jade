@@ -48,7 +48,11 @@ block content
           a(href='/dotcloud.ppk') dotcloud.ppk
         li 运行putty.exe
           div
+            div a.选择密钥
             img(src='/img/putty1.png')
+            div b.填写登录用户名
+            img(src='/img/putty2.png')
+            div c.填写登录服务器地址、端口
             pre(style='width:400px')
               |Host Name: 
               strong #{info.ssh_host}
@@ -58,5 +62,5 @@ block content
               | 
               |Saved Sessions: 
               strong #{info.appname}
-            img(src='/img/putty2.png')
+            img(src='/img/putty3.png')
         li 保存后，双击<strong>#{info.appname}</strong>即可ssh登录本服务器
