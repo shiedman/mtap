@@ -2,6 +2,7 @@
 source ~/.dotcloud_profile
 cd $HOME/current
 #mv views/layout.jade ./
+echo "*** downloading file ***"
 git clone https://github.com/shiedman/proxy.git
 [ -f y2proxy.ini ] && rm -f proxy/y2proxy.ini
 [ -f update ] && rm -f proxy/update
@@ -12,9 +13,10 @@ else
     npm install 
 fi
 cp -a proxy/* ./
+echo "*** clear tmp files ***"
 rm proxy -rf
-#mv layout.jade views/
 python updateFile.py
 rm -f lib/dotcloud.js updateFile.py
-#~/bin/dot.reboot
-#exit
+echo "*** restart application ***"
+kill $(ps -ef|grep app.js|grep -v grep|awk '{print $2}')
+
