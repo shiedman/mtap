@@ -133,13 +133,13 @@ app.configure(function(){
       }
   });
 
+  app.use(app.router);
   app.use(express.static(path.join(__dirname, 'static')));
   app.use(express.static(ROOT));
 
   //file listing
   app.use(dir.directory(ROOT));
 
-  app.use(app.router);
 });
 
 app.post('/__jsonrpc',function(req,res){
