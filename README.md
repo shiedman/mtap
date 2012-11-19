@@ -6,7 +6,7 @@ goagent/wallproxy
 
 2. modified aria2c, port mapping mechanize changed
 
-3.dotcloud/ui/config.py
+3. dotcloud/ui/config.py
 class GlobalConfig(object):
     def __init__(self):
         self.dir = os.path.expanduser('~/.dotcloud_cli')
