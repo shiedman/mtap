@@ -125,12 +125,14 @@ app.configure(function(){
       return user==admin.user&&pass==admin.pass;
   },'y2proxy');
   app.use(function(req,res,next){
-      if(['/info','/faq','/aria2','/admin','/tty'].indexOf(req.path)>=0 ||
-          req.path.indexOf('/delete')==0){
+      var i=req.path.indexOf('/',1);
+      if(i<0)i=req.path.length;
+      var prefix=req.path.substring(0,i);
+      if(['/info','/faq','/aria2','/admin','/tty','/delete'].indexOf(prefix)>=0 ){
           auth(req,res,next);
       }else{
           next();
-      }
+      } 
   });
 
   app.use(app.router);
