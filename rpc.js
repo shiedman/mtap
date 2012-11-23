@@ -88,6 +88,9 @@ function listTask(stype){
         }else{
             var list=json.result.data;
             console.log('*********************************************');
+            if(!list||list.length==0){
+                console.log('currently no active tasks');
+            }
             for(var i=0;i<list.length;i++){
                 console.log(list[i]);
                 console.log('==============================================');
