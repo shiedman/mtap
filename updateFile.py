@@ -34,20 +34,12 @@ out.close()
 http_url='http://localhost/';
 if 'DOTCLOUD_WWW_HTTP_URL' in os.environ:http_url=os.environ['DOTCLOUD_WWW_HTTP_URL']
 with open('static/goagent/proxy.ini','rb') as f:lines=f.read()
-out=open('static/goagent/proxy.ini','wb')
-for line in lines.splitlines(True):
-    if line.find('${DOTCLOUD_WWW_HTTP_URL}')>0:
-        line=line.replace('${DOTCLOUD_WWW_HTTP_URL}',http_url)
-    out.write(line)
-out.close()
+with open('static/goagent/proxy.ini','wb') as f:
+    f.write(lines.replace('${DOTCLOUD_WWW_HTTP_URL}',http_url))
+
 
 with open('static/wallproxy/proxy.ini','rb') as f:lines=f.read()
-out=open('static/wallproxy/proxy.ini','wb')
-for line in lines.splitlines(True):
-    if line.find('${DOTCLOUD_WWW_HTTP_URL}')>0:
-        line=line.replace('${DOTCLOUD_WWW_HTTP_URL}',http_url)
-    out.write(line)
-out.close()
-
+with open('static/wallproxy/proxy.ini','wb') as f:
+    f.write(lines.replace('${DOTCLOUD_WWW_HTTP_URL}',http_url))
 
 
