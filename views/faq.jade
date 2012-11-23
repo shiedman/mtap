@@ -64,3 +64,21 @@ block content
               strong #{info.appname}
             img(src='/img/putty3.png')
         li 保存后，双击<strong>#{info.appname}</strong>即可ssh登录本服务器
+    div
+      p.lead 七、登录服务器后如何批量删除文件
+      p. 
+        unix的删除文件命令是rm，删除目录是：rm -rf &lt;目录名&gt;，支持通配符*。举例:<br>
+        rm file1 file2 file3 (删除文件file1,file2,file3)<br>
+        rm *abc* (删除文件名包含abc的所有文件)<br>
+        rm -rf abc (删除目录abc)<br>
+        <br>
+        这是文件名相对简单的情况，对于中英日混杂的文件名，则tab补完文件名或复制粘帖大法。<br>
+        例如文件：[20111009][澤野明]兄想う故に妹あり 限定版[中文化].rar<br>
+        敲入命令：rm [20111&lt;Tab键&gt; (unix会自动补完整个文件名)<br>
+        或者在putty登录后(网页登录方式不支持复制粘帖)，按着鼠标左键选择整个文件名，Ctrl+&lt;Insert&gt;(复制), rm&lt;空格&gt;&lt;双引号&gt;Shift+&lt;Insert&gt;&lt;双引号&gt;
+
+    div
+      p.lead 八、unix如何解压文件
+      p.
+        rar文件的解压：unrar x &lt;文件名&gt;<br>
+        zip文件的解压：unzip &lt;文件名&gt;

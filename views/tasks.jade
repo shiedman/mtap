@@ -20,7 +20,7 @@ block content
             div.accordion-inner
               for t in actives
                 div.row
-                  div.span9 #{t.id}.#{t.file.name}
+                  div.span9 [#{t.id}].#{t.file.name}
                     div.row
                       div.span5
                         - var pencentage=(100*t.downloaded/t.file.size).toFixed(0);var barclass='active';if(t.status<0)barclass='progress-warning';
@@ -42,7 +42,7 @@ block content
           div.accordion-inner
             for t in finishes
               div.row
-                div.span9 #{t.id}.#{t.file.name}
+                div.span9 [#{t.id}].#{t.file.name}
                   div.row
                     div.span5
                         span.badge(style="padding:3px; float: left; width: 25px; text-align: center;") 100%

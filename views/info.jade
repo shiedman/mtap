@@ -10,15 +10,15 @@ block content
       strong host's info
       pre
         |ssh: #{conf.ssh_url} 
-        a(href='/dotcloud.ppk') [dotcloud.ppk]
+        a(href='/dotcloud.ppk',title='本服务器的putty密钥') [dotcloud.ppk]
         | 
         |proxy: #{conf.proxy_url}
         |goagent: #{conf.http_url}agentfetch 
-        a(href='/goagent/proxy.ini') [proxy.ini]
+        a(href='/goagent/proxy.ini',title='goagent的配置文件') [proxy.ini]
         | 
         |wallproxy: #{conf.http_url}wallfetch 
-        a(href='/wallproxy/proxy.ini') [proxy.ini]
-        a(href='/wallproxy/gui.ini') [gui.ini]
+        a(href='/wallproxy/proxy.ini',title='wallproxy的配置文件1') [proxy.ini]
+        a(href='/wallproxy/gui.ini',title='wallproxy的配置文件2') [gui.ini]
 
     div.alert.alert-info
       form#form1(method='post')
