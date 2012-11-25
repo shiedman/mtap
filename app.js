@@ -72,14 +72,19 @@ app.configure(function(){
   app.set('views', path.join(__dirname,'views'));
   app.set('view engine', 'jade');
   app.enable('trust proxy');
-  app.locals.pretty=true;
+  app.locals.pretty=true; //##remove##
 
 //http://www.senchalabs.org/connect/middleware-logger.html
   app.use(express.logger(logLevel));
 
   //http proxy request
   app.use(function(req,res,next){
-      if(req.url.substring(0,4)=='http'){proxy.handle(req,res); }else{ next();}
+      if(req.url.substring(0,4)=='http'){proxy.handle(req,res); }
+      else if(req.url.substring(0,6)=='/http_'){
+          req.url=req.url.replace('/http_','http:/');
+          proxy.handle(req,res);
+      }
+      else{ next();}
   });
   //aria2 rpc request
   app.use('/jsonrpc_',function (req,res,next){
@@ -240,6 +245,13 @@ app.get(/^\/delete\/(.+)$/,function(req,res){
         var href='/';
         if(fstat.isDirectory()){
             //fs.rmdirSync(filepath);
+            if(filepath=='/home/dotcloud/data/downloads'){
+                logger.warn("path is used for download service, can't be delete:/home/dotcloud/data/downloads");
+                
+                var _msg="'/home/dotcloud/data/downloads' is used for download service, not permit to delete it.";
+                res.writeHead(500,{'Content-Type':'text/plain'});
+                return res.end(_msg);
+            }
             wrench.rmdirSyncRecursive(filepath);
             //href=path.join('/'+filename,'..');
             href=path.dirname('/'+filename);
