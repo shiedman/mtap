@@ -11,14 +11,12 @@ block content
       p 登录服务器后（网页登录或者ssh登录)，敲入命令: www.reboot
     div
       p.lead 二、下载文件保存在哪里？
-      p 
-        | 下载的文件存放在: <a target='_blank' href='/downloads/'>/home/dotcloud/data/downloads/</a>
+      p 下载的文件存放在: <a target='_blank' href='/downloads/'>/home/dotcloud/data/downloads/</a>
     div
       p.lead 三、如何删除下载任务？
-      p 登录服务器后（网页登录或者ssh登录)，敲入命令: rpc del <任务id>。任务id就是下载文件名前面的序号。
+      p 登录服务器后（网页登录或者ssh登录)，敲入命令: rpc del <任务id>。任务id就是tasks区下载文件名前的序号。
     div
-      p.lead
-        | 四、<a href='http://code.google.com/p/wallproxy-plus'>wallproxy</a>如何配置
+      p.lead 四、<a href='http://code.google.com/p/wallproxy-plus'>wallproxy</a>如何配置
       ol
         li 下载wallproxy 2.1.3+: 
           a(href='http://goo.gl/dFtij') http://goo.gl/dFtij
@@ -29,8 +27,7 @@ block content
           a(href='/wallproxy/gui.ini') gui.ini
           |，覆盖local目录的2个同名文件。
     div
-      p.lead
-        | 五、<a href='http://code.google.com/p/goagent'>goagent</a>如何配置
+      p.lead  五、<a href='http://code.google.com/p/goagent'>goagent</a>如何配置
       ol
         li 下载goagent 2.1.5+: 
           a(href='http://goo.gl/sxgfB') http://goo.gl/sxgfB
@@ -66,16 +63,16 @@ block content
         li 保存后，双击<strong>#{info.appname}</strong>即可ssh登录本服务器
     div
       p.lead 七、登录服务器后如何批量删除文件
-      p. 
+      p.
         unix的删除文件命令是rm，删除目录是：rm -rf &lt;目录名&gt;，支持通配符*。举例:<br>
         rm file1 file2 file3 (删除文件file1,file2,file3)<br>
         rm *abc* (删除文件名包含abc的所有文件)<br>
         rm -rf abc (删除目录abc)<br>
         <br>
-        这是文件名相对简单的情况，对于中英日混杂的文件名，则tab补完文件名或复制粘帖大法。<br>
+        这是文件名相对简单的情况，对于中英日混杂的文件名，则tab补完文件名或复制(Ctrl+&lt;Insert&gt;)粘帖(Shift+&lt;Insert&gt;)大法。<br>
         例如文件：[20111009][澤野明]兄想う故に妹あり 限定版[中文化].rar<br>
         敲入命令：rm [20111&lt;Tab键&gt; (unix会自动补完整个文件名)<br>
-        或者在putty登录后(网页登录方式不支持复制粘帖)，按着鼠标左键选择整个文件名，Ctrl+&lt;Insert&gt;(复制), rm&lt;空格&gt;&lt;双引号&gt;Shift+&lt;Insert&gt;&lt;双引号&gt;
+        或者在putty登录后(网页登录方式不支持复制粘帖)，按着鼠标左键选择整个文件名，Ctrl+&lt;Insert&gt;, rm&lt;空格&gt;&lt;双引号&gt;Shift+&lt;Insert&gt;&lt;双引号&gt;
 
     div
       p.lead 八、unix如何解压文件
