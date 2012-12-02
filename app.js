@@ -21,8 +21,8 @@ var ut=require('./lib/utility.js')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
-  //, dotcloud = require('./lib/dotcloud') //##remove##
-  //, _9gal = require('./lib/9gal.js') //##remove##
+  , dotcloud = require('./lib/dotcloud') //##remove##
+  , _9gal = require('./lib/9gal.js') 
   , _115 = require('./lib/115.js') 
   , _weibo = require('./lib/weibo.js') 
   , forward = require('./lib/forward');
@@ -60,7 +60,8 @@ if(SERVER){
         setTimeout(_watchfile,15000);
     },1800000);
     //execute every 10mins
-    setInterval(function(){// _9gal.takeBonus();
+    setInterval(function(){
+        _9gal.takeBonus();
         _115.takeBonus();_weibo.takeBonus();},600000);
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
