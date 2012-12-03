@@ -24,7 +24,7 @@ var ut=require('./lib/utility.js')
   , dotcloud = require('./lib/dotcloud') //##remove##
   , _9gal = require('./lib/9gal.js') 
   , _115 = require('./lib/115.js') 
-  , _weibo = require('./lib/weibo.js') 
+  , _weibo = require('./lib/weibo_wap.js') 
   , forward = require('./lib/forward');
 
 ut.Cookie.load();ut.ini.load();
