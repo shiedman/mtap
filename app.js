@@ -24,6 +24,7 @@ var ut=require('./lib/utility.js')
   , dotcloud = require('./lib/dotcloud') //##remove##
   , _9gal = require('./lib/9gal.js') 
   , _115 = require('./lib/115.js') 
+  , _115_upload = require('./lib/115_upload.js') 
   , _weibo = require('./lib/weibo_wap.js') 
   , forward = require('./lib/forward');
 
@@ -168,7 +169,8 @@ app.post('/__jsonrpc',function(req,res){
             baidu.upload(params.file);
         }else if(method=='vdisk.upload'){
             httptask.queue(vdisk.upload,[params.file]);
-            //weibo.upload(params.file);
+        }else if(method=='115.upload'){
+            httptask.queue(_115_upload.upload,[params.file]);
         }else if(method=='httptask.deleteTask'){
             var ret=httptask.deleteTask(params.taskid);
             if(ret<0)throw  new Error(params.taskid+' not exists');
