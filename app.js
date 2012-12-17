@@ -26,6 +26,7 @@ var ut=require('./lib/utility.js')
   , _115 = require('./lib/115.js') 
   , _115_upload = require('./lib/115_upload.js') 
   , _weibo = require('./lib/weibo_wap.js') 
+  , httpsocket = require('./lib/httpsocket.js') 
   , forward = require('./lib/forward');
 
 ut.Cookie.load();ut.ini.load();
@@ -83,8 +84,8 @@ app.configure(function(){
   //http proxy request
   app.use(function(req,res,next){
       if(req.url.substring(0,4)=='http'){proxy.handle(req,res); }
-      else if(req.url.substring(0,6)=='/http_'){
-          req.url=req.url.replace('/http_','http:/');
+      else if(req.url.substring(0,6)=='/http0'){
+          req.url=req.url.replace('/http0','http:/');
           proxy.handle(req,res);
       }
       else{ next();}
@@ -208,6 +209,12 @@ app.post('/wallfetch',wallproxy.serve);
 app.get('/admin',function(req,res){
     res.render('admin',{admin:admin}); 
 });
+app.all('/httpsocket',function(req,res){
+    httpsocket.handle(req,res);
+});
+app.all('/httpx',function(req,res){
+    req.on('end',function(){ res.end('OK'); });
+});
 
 app.get('/faq',function(req,res){
     var ssh_host=process.env.DOTCLOUD_WWW_SSH_HOST||'demo-nana.dotcloud.com';
@@ -329,3 +336,4 @@ if(SERVER){
       console.log("Express server listening on port %s",PORT);
     });
 }
+
