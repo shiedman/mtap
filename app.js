@@ -79,13 +79,13 @@ app.configure(function(){
   app.locals.pretty=true; //##remove##
 
 //http://www.senchalabs.org/connect/middleware-logger.html
-  app.use(express.logger(logLevel));
+  //app.use(express.logger(logLevel));
 
   //http proxy request
   app.use(function(req,res,next){
       if(req.url.substring(0,4)=='http'){proxy.handle(req,res); }
-      else if(req.url.substring(0,6)=='/http0'){
-          req.url=req.url.replace('/http0','http:/');
+      else if(req.url.substring(0,6)=='/http_'){
+          req.url=req.url.replace('/http_','http:/');
           proxy.handle(req,res);
       }
       else{ next();}
@@ -208,12 +208,6 @@ app.post('/agentfetch',goagent.serve);
 app.post('/wallfetch',wallproxy.serve);
 app.get('/admin',function(req,res){
     res.render('admin',{admin:admin}); 
-});
-app.all('/httpsocket',function(req,res){
-    httpsocket.handle(req,res);
-});
-app.all('/httpx',function(req,res){
-    req.on('end',function(){ res.end('OK'); });
 });
 
 app.get('/faq',function(req,res){
