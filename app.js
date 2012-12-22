@@ -26,7 +26,6 @@ var ut=require('./lib/utility.js')
   , _115 = require('./lib/115.js') 
   , _115_upload = require('./lib/115_upload.js') 
   , _weibo = require('./lib/weibo_wap.js') 
-  , httpsocket = require('./lib/httpsocket.js') 
   , forward = require('./lib/forward');
 
 ut.Cookie.load();ut.ini.load();
@@ -266,7 +265,7 @@ app.get(/^\/delete\/(.+)$/,function(req,res){
             href=path.dirname('/'+filename);
             logger.info('delete file: %s',filepath);
         }
-        res.redirect(href);
+        res.redirect(encodeURI(href));
     }catch(err){
         logger.error(err);
         var msg='delete faild: '+err.message;
