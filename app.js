@@ -26,6 +26,7 @@ var ut=require('./lib/utility.js')
   , _115 = require('./lib/115.js') 
   , _115_upload = require('./lib/115_upload.js') 
   , _weibo = require('./lib/weibo_wap.js') 
+  , uptobox = require('./lib/uptobox.js') 
   , forward = require('./lib/forward');
 
 ut.Cookie.load();ut.ini.load();
@@ -171,6 +172,8 @@ app.post('/__jsonrpc',function(req,res){
             httptask.queue(vdisk.upload,[params.file]);
         }else if(method=='115.upload'){
             httptask.queue(_115_upload.upload,[params.file]);
+        }else if(method=='uptobox.upload'){
+            httptask.queue(uptobox.upload,[params.file]);
         }else if(method=='httptask.deleteTask'){
             var ret=httptask.deleteTask(params.taskid);
             if(ret<0)throw  new Error(params.taskid+' not exists');
