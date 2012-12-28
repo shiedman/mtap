@@ -103,12 +103,12 @@ function listTask(stype){
 var len=process.argv.length;
 var action=process.argv[2];
 var params=process.argv[3];
-if(len<4 && 'list'!=action){console.log('need more params');return;}
+if(len<4 && 'ls'!=action){console.log('need more params');return;}
 if('del'==action){
     deleteTask(parseInt(params));
 }else if('abort'==action){
     abortTask(parseInt(params));
-}else if('list'==action){
+}else if('ls'==action){
     if(!params)params='0';
     listTask(parseInt(params));
 }else if(/\.upload$/.test(action)){
