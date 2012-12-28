@@ -87,9 +87,13 @@ app.configure(function(){
       }
       else{ next();}
   });
-  //aria2 rpc request
+  //aria2 jsonrpc request
   app.use('/jsonrpc_',function (req,res,next){
       forward('localhost',6800,'/jsonrpc'+req.url.substring(1))(req,res);
+  });
+  //aria2 rpc request
+  app.use('/rpc_',function (req,res,next){
+      forward('localhost',6800,'/rpc')(req,res);
   });
   app.use(express.favicon());
   app.use(express.bodyParser());
