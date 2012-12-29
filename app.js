@@ -16,20 +16,17 @@ var ut=require('./lib/utility.js')
   , dir=require('./lib/directory')
   , httptask = require('./lib/httptask')
   , xunlei = require('./lib/xunlei')
-  , baidu = require('./lib/baidu')
   , vdisk = require('./lib/vdisk')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
-  , dotcloud = require('./lib/dotcloud') //##remove##
   , _9gal = require('./lib/9gal.js') 
   , _115 = require('./lib/115.js') 
-  , _115_upload = require('./lib/115_upload.js') 
   , _weibo = require('./lib/weibo_wap.js') 
   , uptobox = require('./lib/uptobox.js') 
   , forward = require('./lib/forward');
 
-ut.Cookie.load();ut.ini.load();
+ut.ini.load();
 
 var logLevel='dev' , PORT=80 , ROOT='d:/home';
 var SERVER=process.env.PORT_WWW;
@@ -39,15 +36,10 @@ if(SERVER){
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
         logger.warn('Server is exiting....');
-        ut.Cookie.save();
         ut.ini.write();
         process.exit(1);//if return 0,supervisor won't respawn proccess
     });
     function _watchfile(){
-        fs.watchFile(ut.Cookie.file,function(cur,prev){
-            logger.log('File Changed: '+ut.Cookie.file);
-            ut.Cookie.load();
-        });
         fs.watchFile(ut.ini.file,function(cur,prev){
             logger.log('File Changed: '+ut.ini.file);
             ut.ini.load();
@@ -56,15 +48,14 @@ if(SERVER){
     _watchfile();
     //execute every 30mins
     setInterval(function(){
-        fs.unwatchFile(ut.Cookie.file);
         fs.unwatchFile(ut.ini.file);
-        setTimeout(function(){ut.Cookie.save();ut.ini.write();},5000);
+        setTimeout(function(){ut.ini.write();},5000);
         setTimeout(_watchfile,15000);
     },1800000);
     //execute every 10mins
     setInterval(function(){
-        _9gal.takeBonus();
-        _115.takeBonus();_weibo.takeBonus();},600000);
+        _9gal.checkin(); _115.checkin();_weibo.checkin();
+    },600000);
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
 }
@@ -90,9 +81,13 @@ app.configure(function(){
       }
       else{ next();}
   });
-  //aria2 rpc request
+  //aria2 jsonrpc request
   app.use('/jsonrpc_',function (req,res,next){
       forward('localhost',6800,'/jsonrpc'+req.url.substring(1))(req,res);
+  });
+  //aria2 rpc request
+  app.use('/rpc_',function (req,res,next){
+      forward('localhost',6800,'/rpc')(req,res);
   });
   app.use(express.favicon());
   app.use(express.bodyParser());
@@ -166,12 +161,10 @@ app.post('/__jsonrpc',function(req,res){
         if(method=='xunlei.upload'){
             httptask.queue(xunlei.upload,[params.file]);
             //xunlei.upload(params.file);
-        }else if(method=='baidu.upload'){
-            baidu.upload(params.file);
         }else if(method=='vdisk.upload'){
             httptask.queue(vdisk.upload,[params.file]);
         }else if(method=='115.upload'){
-            httptask.queue(_115_upload.upload,[params.file]);
+            httptask.queue(_115.upload,[params.file]);
         }else if(method=='uptobox.upload'){
             httptask.queue(uptobox.upload,[params.file]);
         }else if(method=='httptask.deleteTask'){
