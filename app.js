@@ -40,27 +40,20 @@ if(SERVER){
         ut.ini.write();
         process.exit(1);//if return 0,supervisor won't respawn proccess
     });
-    //function _watchfile(){
-        fs.watchFile(ut.ini.file,function(cur,prev){
-            if(ut.ini.writed>0){
-                ut.ini.writed--;
-                return;
-            }
-            logger.log('File Changed: '+ut.ini.file);
-            ut.ini.load();
-        });
-    //}
-    //_watchfile();
+    fs.watchFile(ut.ini.file,function(cur,prev){
+        if(ut.ini.writed>0){
+            ut.ini.writed--;
+            return;
+        }
+        logger.log('File Changed: '+ut.ini.file);
+        ut.ini.load();
+    });
     //execute every 30mins
     setInterval(function(){ut.ini.write()},1800000);
-        //fs.unwatchFile(ut.ini.file);
-        //setTimeout(function(){ut.ini.write();},5000);
-        //setTimeout(_watchfile,15000);
-    //},1800000);
+
     //execute every 10mins
-    setInterval(function(){
-        _9gal.checkin(); _115.checkin();_weibo.checkin();ishare.checkin();
-    },600000);
+    //setInterval(function(){ _9gal.checkin(); _115.checkin();_weibo.checkin();ishare.checkin(); },600000);
+
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
 }
