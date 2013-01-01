@@ -51,8 +51,8 @@ if(SERVER){
     //execute every 30mins
     setInterval(function(){ut.ini.write()},1800000);
 
-    //execute every 10mins
-    //setInterval(function(){ _9gal.checkin(); _115.checkin();_weibo.checkin();ishare.checkin(); },600000);
+    //execute every 5mins
+    //setInterval(function(){ _9gal.checkin(); _115.checkin();_weibo.checkin();ishare.checkin(); },300000);
 
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
