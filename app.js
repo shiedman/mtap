@@ -24,6 +24,7 @@ var ut=require('./lib/utility.js')
   , _115 = require('./lib/115.js') 
   , _weibo = require('./lib/weibo_wap.js') 
   , uptobox = require('./lib/uptobox.js') 
+  , ishare = require('./lib/ishare.js') 
   , forward = require('./lib/forward');
 
 ut.ini.load();
@@ -39,22 +40,26 @@ if(SERVER){
         ut.ini.write();
         process.exit(1);//if return 0,supervisor won't respawn proccess
     });
-    function _watchfile(){
+    //function _watchfile(){
         fs.watchFile(ut.ini.file,function(cur,prev){
+            if(ut.ini.writed>0){
+                ut.ini.writed--;
+                return;
+            }
             logger.log('File Changed: '+ut.ini.file);
             ut.ini.load();
         });
-    }
-    _watchfile();
+    //}
+    //_watchfile();
     //execute every 30mins
-    setInterval(function(){
-        fs.unwatchFile(ut.ini.file);
-        setTimeout(function(){ut.ini.write();},5000);
-        setTimeout(_watchfile,15000);
-    },1800000);
+    setInterval(function(){ut.ini.write()},1800000);
+        //fs.unwatchFile(ut.ini.file);
+        //setTimeout(function(){ut.ini.write();},5000);
+        //setTimeout(_watchfile,15000);
+    //},1800000);
     //execute every 10mins
     setInterval(function(){
-        _9gal.checkin(); _115.checkin();_weibo.checkin();
+        _9gal.checkin(); _115.checkin();_weibo.checkin();ishare.checkin();
     },600000);
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
@@ -214,22 +219,23 @@ app.get('/faq',function(req,res){
 });
 
 app.get('/info',function(req,res){
-    var env={ini:ut.ini.toText(),http_url:'http://localhost/',ssh_url:'localhost',proxy_url:'localhost'};
+    var env={http_url:'http://localhost/',ssh_url:'localhost',proxy_url:'localhost'};
     if(SERVER){
         env={
             http_url:process.env.DOTCLOUD_WWW_HTTP_URL,
             ssh_url:process.env.DOTCLOUD_WWW_SSH_URL.replace('ssh://dotcloud@',''),
-            proxy_url:process.env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://',''),
-            ini: ut.ini.toText()
+            proxy_url:process.env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://','')
         }
     }
+    env['ini']=ut.ini.serialize()
     res.render('info',{conf:env});
 });
 app.post('/info',function(req,res){
     var content=req.body.ini;
     if(content&&content.length>0){
         try{
-            ut.mergeIni(content);
+            fs.writeFile(ut.ini.file,content);
+            //ut.mergeIni(content);
         }catch(err){
             console.error(err);
         }
