@@ -15,15 +15,16 @@ var ut=require('./lib/utility.js')
   , logger=ut.logger
   , dir=require('./lib/directory')
   , httptask = require('./lib/httptask')
-  , xunlei = require('./lib/xunlei')
-  , vdisk = require('./lib/vdisk')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
   , _9gal = require('./lib/9gal.js') 
   , _115 = require('./lib/115.js') 
+  , xunlei = require('./lib/xunlei')
+  , vdisk = require('./lib/vdisk')
   , weibo = require('./lib/weibo_wap.js') 
   , uptobox = require('./lib/uptobox.js') 
+  , baidu = require('./lib/baidu.js') 
   , ishare = require('./lib/ishare.js') 
   , forward = require('./lib/forward');
 
@@ -52,7 +53,7 @@ if(SERVER){
     setInterval(function(){ut.ini.write()},1800000);
 
     //execute every 5mins
-    //setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin();ishare.checkin(); },300000);
+//setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin();ishare.checkin(); },300000);
 
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
@@ -156,27 +157,36 @@ app.post('/__jsonrpc',function(req,res){
             var stat=fs.statSync(filepath);
             if(!stat.isFile())throw new Error('not a File: '+filepath);
         }
-        if(method=='xunlei.upload'){
-            httptask.queue(xunlei.upload,[params.file]);
-        }else if(method=='vdisk.upload'){
-            httptask.queue(vdisk.upload,[params.file]);
-        }else if(method=='115.upload'){
-            httptask.queue(_115.upload,[params.file]);
-        }else if(method=='uptobox.upload'){
-            httptask.queue(uptobox.upload,[params.file]);
-        }else if(method=='httptask.deleteTask'){
-            var ret=httptask.deleteTask(params.taskid);
-            if(ret<0)throw  new Error(params.taskid+' not exists');
-        }else if(method=='httptask.abortTask'){
-            var ret=httptask.abortTask(params.taskid);
-            if(ret<0)throw  new Error(params.taskid+' not exists');
-        }else if(method=='httptask.listTask'){
-            var ret=httptask.listTask(params.status);
-            if(!ret)throw  new Error('empty task list');
-            return res.json({jsonrpc:'2.0',id:1,result:{'data':ret}});
-        }else{
-            throw new Error('method:'+method+' not exists');
+        var rtn=0;
+        switch (method) {
+            case 'xunlei.upload':
+                httptask.queue(xunlei.upload,[params.file]);
+                break;
+            case 'vdisk.upload':
+                httptask.queue(vdisk.upload,[params.file]);
+                break;
+            case '115.upload':
+                httptask.queue(_115.upload,[params.file]);
+                break;
+            case 'uptobox.upload':
+                httptask.queue(uptobox.upload,[params.file]);
+                break;
+            case 'baidu.upload':
+                httptask.queue(baidu.upload,[params.file]);
+                break;
+            case 'httptask.deleteTask':
+                rtn=httptask.deleteTask(params.taskid);
+                break;
+            case 'httptask.abortTask':
+                rtn=httptask.abortTask(params.taskid);
+                break;
+            case 'httptask.listTask':
+                var tasks=httptask.listTask(params.status);
+                return res.json({jsonrpc:'2.0',id:1,result:{'data':tasks}});
+            default:
+                throw new Error('method:'+method+' not exists');
         }
+        if(rtn<0)throw  new Error(params.taskid+' not exists');
         res.json({jsonrpc:'2.0',id:1,result:'success'});
     }catch(err){
         console.warn(err.message);
