@@ -22,7 +22,7 @@ var ut=require('./lib/utility.js')
   , proxy = require('./lib/proxy')
   , _9gal = require('./lib/9gal.js') 
   , _115 = require('./lib/115.js') 
-  , _weibo = require('./lib/weibo_wap.js') 
+  , weibo = require('./lib/weibo_wap.js') 
   , uptobox = require('./lib/uptobox.js') 
   , ishare = require('./lib/ishare.js') 
   , forward = require('./lib/forward');
@@ -43,16 +43,16 @@ if(SERVER){
     fs.watchFile(ut.ini.file,function(cur,prev){
         if(ut.ini.writed>0){
             ut.ini.writed--;
-            return;
+        }else{
+            logger.info('[iniconfig]changed: %s',ut.ini.file);
+            ut.ini.load();
         }
-        logger.log('File Changed: '+ut.ini.file);
-        ut.ini.load();
     });
     //execute every 30mins
     setInterval(function(){ut.ini.write()},1800000);
 
     //execute every 5mins
-    //setInterval(function(){ _9gal.checkin(); _115.checkin();_weibo.checkin();ishare.checkin(); },300000);
+    //setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin();ishare.checkin(); },300000);
 
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
@@ -158,7 +158,6 @@ app.post('/__jsonrpc',function(req,res){
         }
         if(method=='xunlei.upload'){
             httptask.queue(xunlei.upload,[params.file]);
-            //xunlei.upload(params.file);
         }else if(method=='vdisk.upload'){
             httptask.queue(vdisk.upload,[params.file]);
         }else if(method=='115.upload'){
@@ -172,7 +171,7 @@ app.post('/__jsonrpc',function(req,res){
             var ret=httptask.abortTask(params.taskid);
             if(ret<0)throw  new Error(params.taskid+' not exists');
         }else if(method=='httptask.listTask'){
-            var ret=httptask.listTask(params.type);
+            var ret=httptask.listTask(params.status);
             if(!ret)throw  new Error('empty task list');
             return res.json({jsonrpc:'2.0',id:1,result:{'data':ret}});
         }else{
