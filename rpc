@@ -119,7 +119,15 @@ def aria2_rpc(argv):
     elif act=='del' and len(argv)==2:
         rpc.remove(argv[1])
     elif act=='add' and len(argv)>=2:
-        rpc.addUri(argv[1:])
+        if argv[1]=='--file':
+            with open(argv[2],'r') as f:
+                lines=[l.strip() for l in f.read().splitlines()]
+            urls=[line for line in lines if len(line)>0]
+            for url in urls: rpc.addUri([url])
+            logging.info('download:%s',urls)
+        else:
+            rpc.addUri(argv[1:])
+            logging.info('download:%s',argv[1:])
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')

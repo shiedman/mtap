@@ -29,6 +29,7 @@ var ut=require('./lib/utility.js')
   , forward = require('./lib/forward');
 
 ut.ini.load();
+ut.cookie.load();
 
 var logLevel='dev' , PORT=80 , ROOT='d:/home';
 var SERVER=process.env.PORT_WWW;
@@ -50,10 +51,15 @@ if(SERVER){
         }
     });
     //execute every 30mins
-    setInterval(function(){ut.ini.write()},1800000);
+    setInterval(function(){
+        ut.ini.write();
+        ut.cookie.save();
+    },1800000);
 
     //execute every 5mins
-//setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin();ishare.checkin(); },300000);
+    if(process.env['CHECK_IN']){
+        setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin();ishare.checkin(); },300000);
+    }
 
     //execute every 30s
     setInterval(function(){ httptask.updateTask();},30000);
