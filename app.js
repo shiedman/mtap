@@ -25,7 +25,6 @@ var ut=require('./lib/utility.js')
   , weibo = require('./lib/weibo_wap.js') 
   , uptobox = require('./lib/uptobox.js') 
   , baidu = require('./lib/baidu.js') 
-  , ishare = require('./lib/ishare.js') 
   , forward = require('./lib/forward');
 
 ut.ini.load();
@@ -58,7 +57,8 @@ if(SERVER){
 
     //execute every 5mins
     if(process.env['CHECK_IN']){
-        setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin();ishare.checkin(); },300000);
+        logger.info('check in every 5 mins');
+        setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin(); },300000);
     }
 
     //execute every 30s
