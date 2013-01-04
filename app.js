@@ -25,6 +25,7 @@ var ut=require('./lib/utility.js')
   , weibo = require('./lib/weibo_wap.js') 
   , uptobox = require('./lib/uptobox.js') 
   , baidu = require('./lib/baidu.js') 
+  , ctdisk = require('./lib/ctdisk.js') 
   , forward = require('./lib/forward');
 
 ut.ini.load();
@@ -179,6 +180,9 @@ app.post('/__jsonrpc',function(req,res){
                 break;
             case 'baidu.upload':
                 httptask.queue(baidu.upload,[params.file]);
+                break;
+            case 'ctdisk.upload':
+                httptask.queue(ctdisk.upload,[params.file]);
                 break;
             case 'httptask.deleteTask':
                 rtn=httptask.deleteTask(params.taskid);
