@@ -18,14 +18,7 @@ var ut=require('./lib/utility.js')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
-  , _9gal = require('./lib/9gal.js') 
-  , _115 = require('./lib/115.js') 
-  , xunlei = require('./lib/xunlei')
-  , vdisk = require('./lib/vdisk')
-  , weibo = require('./lib/weibo_wap.js') 
-  , uptobox = require('./lib/uptobox.js') 
-  , baidu = require('./lib/baidu.js') 
-  , ctdisk = require('./lib/ctdisk.js') 
+  , site = require('./lib/site.js').site
   , forward = require('./lib/forward');
 
 ut.ini.load();
@@ -56,10 +49,9 @@ if(SERVER){
         ut.cookie.save();
     },1800000);
 
-    //execute every 5mins
     if(process.env['CHECK_IN']){
-        logger.info('check in every 5 mins');
-        setInterval(function(){ _9gal.checkin(); _115.checkin();weibo.checkin(); },300000);
+        logger.info('check in every 10 mins');
+        setInterval(function(){ site.checkin(); },600000);
     }
 
     //execute every 30s
@@ -165,36 +157,20 @@ app.post('/__jsonrpc',function(req,res){
             if(!stat.isFile())throw new Error('not a File: '+filepath);
         }
         var rtn=0;
-        switch (method) {
-            case 'xunlei.upload':
-                httptask.queue(xunlei.upload,[params.file]);
-                break;
-            case 'vdisk.upload':
-                httptask.queue(vdisk.upload,[params.file]);
-                break;
-            case '115.upload':
-                httptask.queue(_115.upload,[params.file]);
-                break;
-            case 'uptobox.upload':
-                httptask.queue(uptobox.upload,[params.file]);
-                break;
-            case 'baidu.upload':
-                httptask.queue(baidu.upload,[params.file]);
-                break;
-            case 'ctdisk.upload':
-                httptask.queue(ctdisk.upload,[params.file]);
-                break;
-            case 'httptask.deleteTask':
-                rtn=httptask.deleteTask(params.taskid);
-                break;
-            case 'httptask.abortTask':
-                rtn=httptask.abortTask(params.taskid);
-                break;
-            case 'httptask.listTask':
-                var tasks=httptask.listTask(params.status);
-                return res.json({jsonrpc:'2.0',id:1,result:{'data':tasks}});
-            default:
-                throw new Error('method:'+method+' not exists');
+        if(method=='httptask.deleteTask'){
+            rtn=httptask.deleteTask(params.taskid);
+        }else if(method=='httptask.abortTask'){
+            rtn=httptask.abortTask(params.taskid);
+        }else if(method=='httptask.listTask'){
+            var tasks=httptask.listTask(params.status);
+            return res.json({jsonrpc:'2.0',id:1,result:{'data':tasks}});
+        }else if(method.search(/\.upload$/)>0){
+            var func=site[method];
+            console.log(func);
+            if(typeof func!='function') throw new Error('upload:'+method+' not exists');
+            httptask.queue(func,[params.file]);
+        }else{
+            throw new Error('method:'+method+' not exists');
         }
         if(rtn<0)throw  new Error(params.taskid+' not exists');
         res.json({jsonrpc:'2.0',id:1,result:'success'});

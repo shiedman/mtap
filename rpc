@@ -68,7 +68,7 @@ class HttpTask:
         rtn=jsonRPC('httptask.deleteTask',{'taskid':id})
         if not rtn:return
         if 'error' in rtn:
-            logging.error('failed to remove %s:%s',id,'error' in rtn['message'])
+            logging.error('failed to remove %s:%s',id,rtn['error']['message'])
         else:
             logging.info('remove task %s',id)
 
@@ -77,7 +77,7 @@ class HttpTask:
         rtn=jsonRPC('httptask.abortTask',{'taskid':id})
         if not rtn:return
         if 'error' in rtn:
-            logging.error('failed to abort %s:%s',id,'error' in rtn['message'])
+            logging.error('failed to abort %s:%s',id,rtn['error']['message'])
         else:
             logging.info('abort task %s',id)
 
@@ -86,7 +86,7 @@ class HttpTask:
         rtn=jsonRPC('httptask.listTask',{'status':status})
         if not rtn:return
         if 'error' in rtn:
-            return logging.error('failed to list task:%s','error' in rtn['message'])
+            return logging.error('failed to list task:%s',rtn['error']['message'])
 
         list=rtn['result'].get('data');
         logging.info('*********************************************')
@@ -105,7 +105,7 @@ def upload(filepath,method):
     rtn=jsonRPC(method,{'file':filepath})
     if not rtn:return
     if 'error' in rtn:
-        logging.error('upload failed:%s','error' in rtn['message'])
+        logging.error('upload failed:%s',rtn['error']['message'])
     else:
         logging.info('uploading file:%s',filepath)
 
