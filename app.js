@@ -166,7 +166,6 @@ app.post('/__jsonrpc',function(req,res){
             return res.json({jsonrpc:'2.0',id:1,result:{'data':tasks}});
         }else if(method.search(/\.upload$/)>0){
             var func=site[method];
-            console.log(func);
             if(typeof func!='function') throw new Error('upload:'+method+' not exists');
             httptask.queue(func,[params.file]);
         }else{
