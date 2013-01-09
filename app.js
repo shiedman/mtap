@@ -24,10 +24,17 @@ var ut=require('./lib/utility.js')
 ut.ini.load();
 ut.cookie.load();
 
-var logLevel='dev' , PORT=80 , ROOT='d:/home';
-var SERVER=process.env.PORT_WWW;
+fs.exists(ut.env.ROOT_DIR,function(exists){
+    if(!exists){ fs.mkdir(ut.env.ROOT_DIR); }
+});
+fs.exists(ut.env.DOWNLOAD_DIR,function(exists){
+    if(!exists){setTimeout(function(){fs.mkdir(ut.env.DOWNLOAD_DIR);},3000);}
+});
+var logLevel='dev' , PORT=80 , ROOT=ut.env.ROOT_DIR;
+//dotcloud or appfog
+var SERVER=ut.env.PORT_WWW;
 if(SERVER){
-    logLevel='tiny',PORT=SERVER, ROOT='/home/dotcloud/data';
+    logLevel='tiny',PORT=SERVER;
 //process.on('SIGINT', function () { console.log(' Press Control-D to exit.'); }); 
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
@@ -309,8 +316,7 @@ if(SERVER){
         app:app,
         server:httpserver,
         shell:'bash',
-        port: PORT,
-        cwd: '/home/dotcloud/data/downloads'
+        port: PORT
     });
     ttyapp.listen();
 }else{
