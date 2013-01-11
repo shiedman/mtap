@@ -22,7 +22,7 @@ var ut=require('./lib/utility.js')
   , forward = require('./lib/forward');
 
 ut.ini.load();
-ut.cookie.load();
+//ut.cookie.load();
 
 fs.exists(ut.env.ROOT_DIR,function(exists){
     if(!exists){ fs.mkdir(ut.env.ROOT_DIR); }
@@ -53,7 +53,7 @@ if(SERVER){
     //execute every 30mins
     setInterval(function(){
         ut.ini.write();
-        ut.cookie.save();
+        //ut.cookie.save();
     },1800000);
 
     if(process.env['CHECK_IN']){
@@ -213,15 +213,15 @@ app.get('/faq',function(req,res){
 });
 
 app.get('/info',function(req,res){
-    var env={http_url:'http://localhost/',ssh_url:'localhost',proxy_url:'localhost'};
-    if(SERVER){
-        env={
-            http_url:process.env.DOTCLOUD_WWW_HTTP_URL,
-            ssh_url:process.env.DOTCLOUD_WWW_SSH_URL.replace('ssh://dotcloud@',''),
-            proxy_url:process.env.DOTCLOUD_WWW_PROXY_URL.replace('tcp://','')
-        }
-    }
-    env['ini']=ut.ini.serialize()
+    var http_url=process.env.DOTCLOUD_WWW_HTTP_URL||'http://localhost';
+    var ssh_url=process.env.DOTCLOUD_WWW_SSH_URL||'localhost';
+    var proxy_url=process.env.DOTCLOUD_WWW_PROXY_URL||'localhost';
+    var env={
+        http_url:http_url,
+        ssh_url:ssh_url.replace('ssh://dotcloud@',''),
+        proxy_url:proxy_url.replace('tcp://','')
+    };
+    env['ini']=ut.ini.serialize();
     res.render('info',{conf:env});
 });
 app.post('/info',function(req,res){
