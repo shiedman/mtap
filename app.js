@@ -306,6 +306,7 @@ if(SERVER){
         app:app,
         server:httpserver,
         shell:'bash',
+        cwd: '/home/dotcloud/data/downloads',
         port: PORT
     });
     ttyapp.listen();
