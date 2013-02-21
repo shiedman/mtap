@@ -22,7 +22,6 @@ var ut=require('./lib/utility.js')
   , forward = require('./lib/forward');
 
 ut.ini.load();
-//ut.cookie.load();
 
 fs.exists(ut.env.ROOT_DIR,function(exists){
     if(!exists){ fs.mkdir(ut.env.ROOT_DIR); }
@@ -35,7 +34,7 @@ var logLevel='dev' , PORT=80 , ROOT=ut.env.ROOT_DIR;
 var SERVER=ut.env.PORT_WWW;
 if(SERVER){
     logLevel='tiny',PORT=SERVER;
-//process.on('SIGINT', function () { console.log(' Press Control-D to exit.'); }); 
+    //process.on('SIGINT', function () { console.log(' Press Control-D to exit.'); }); 
     process.on('SIGTERM',function(){
     //process.on('exit',function(){
         logger.warn('Server is exiting....');
@@ -50,18 +49,18 @@ if(SERVER){
             ut.ini.load();
         }
     });
-    //execute every 30mins
+    //save ini config  every 30mins
     setInterval(function(){
         ut.ini.write();
         //ut.cookie.save();
-    },1800000);
+    },600000);
 
-    if(process.env['CHECK_IN']){
-        logger.info('check in every 10 mins');
+    if(ut.ini.param('system')['auto_checkin']=='yes'){
+        logger.info('auto check in every 10 mins');
         setInterval(function(){ site.checkin(); },600000);
     }
 
-    //execute every 30s
+    //check download/upload task every 30s
     setInterval(function(){ httptask.updateTask();},30000);
 }
 
@@ -117,12 +116,10 @@ app.configure(function(){
           }
           admin.user=user;
           admin.pass=pass1;
-          //console.log('user=%s,pass=%s',user,pass);
           fs.writeFile(adminFile,JSON.stringify(admin));
           adminExist=true;
           return res.redirect('/info');
       }
-      //if(admin.user)req.user=admin.user;
       //setup admin user and pass
       if(!adminExist){
           res.render('admin',{admin:admin});
@@ -189,8 +186,6 @@ app.post('/__jsonrpc',function(req,res){
 
 app.configure('development', function(){
     app.use(express.errorHandler({ showStack: true, dumpExceptions: true }));
-    //app.get('/dotcloud',dotcloud.get);//##remove##
-    //app.post('/dotcloud',dotcloud.post);//##remove##
 });
 app.configure('production', function(){
     app.use(express.errorHandler());
@@ -203,15 +198,29 @@ app.post('/wallfetch',wallproxy.serve);
 app.get('/admin',function(req,res){
     res.render('admin',{admin:admin}); 
 });
+app.get('/_versions',function(req,res){
+    res.writeHead(200,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify(process.versions,null,2));
+});
 
 app.get('/faq',function(req,res){
     var ssh_host=process.env.DOTCLOUD_WWW_SSH_HOST||'demo-nana.dotcloud.com';
-    var i = ssh_host.indexOf('.');
-    var name=ssh_host.substring(0,i);
+    var i = ssh_host.indexOf('.'),name=ssh_host.substring(0,i);
     var _info={'ssh_host':ssh_host,ssh_port:process.env.DOTCLOUD_WWW_SSH_PORT,appname:name};
     res.render('faq',{info:_info});
 });
 
+app.get('/info/demo.ini',function(req,res){
+    var demo=path.resolve(path.join(__dirname,'demo.ini'));
+    try{
+        var msg=fs.readFileSync(demo);
+        res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Content-Length':msg.length});
+        res.end(msg);
+    }catch(err){
+        res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8'});
+        res.end('failed to read demo file:\n'+err.message);
+    }
+});
 app.get('/info',function(req,res){
     var http_url=process.env.DOTCLOUD_WWW_HTTP_URL||'http://localhost';
     var ssh_url=process.env.DOTCLOUD_WWW_SSH_URL||'localhost';
@@ -221,7 +230,8 @@ app.get('/info',function(req,res){
         ssh_url:ssh_url.replace('ssh://dotcloud@',''),
         proxy_url:proxy_url.replace('tcp://','')
     };
-    env['ini']=ut.ini.serialize();
+    var msg='; name: 帐号id\r\n; pass: 密码\r\n; ntime/count: 程序计数用，勿修改\r\n';
+    env['ini']=msg+ut.ini.serialize();
     res.render('info',{conf:env});
 });
 app.post('/info',function(req,res){
@@ -235,7 +245,6 @@ app.post('/info',function(req,res){
         }
     }
     res.redirect('/info');
-
 });
 app.get(/^\/delete\/(.+)$/,function(req,res){
     try{
@@ -270,25 +279,6 @@ app.get(/^\/delete\/(.+)$/,function(req,res){
     }
 });
 
-/*
-app.get('/y2proxy_ini',function(req,res){
-    var headers={};
-    var proxy_response={filename:'y2proxy'};
-    var userAgent=req.headers['user-agent'];
-    if(userAgent)userAgent=userAgent.toLowerCase();
-    if(userAgent.indexOf('msie')>=0 || userAgent.indexOf('chrome')>=0){
-        headers['Content-Disposition']='attachment; filename='+encodeURIComponent(proxy_response.filename+'.ini');
-    }else if(userAgent.indexOf('firefox')>=0){
-        headers['Content-Disposition']='attachment; filename*="utf8\'\''+encodeURIComponent(proxy_response.filename+'.ini')+'"';
-    } else{
-        headers['Content-Disposition']='attachment; filename='+(proxy_response.filename+'.ini');
-    }
-    var s='[115]\r\nbober@163.com=121345\r\n\r\n[9gal]\r\nbaka=983jdka\r\n\r\n[xunlei]\r\nnh3@163.com=uh3dade\r\n\r\n[vdisk]\r\nyuri@163.com=jkea212cjkd\r\n'
-    headers['Content-Length']=s.length;
-    res.writeHead(200,headers);
-    res.end(s);
-});
-*/
 
 /** boot server **/
 var httpserver=http.createServer(app);

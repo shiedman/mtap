@@ -20,8 +20,8 @@ class Aria2:
             total=int(t['totalLength'])
             completed=int(t['completedLength'])
             speed=int(t['downloadSpeed'])
-            secs=(total-completed)/speed
-            delta=datetime.timedelta(seconds=secs)
+            secs=(total-completed)/speed if speed else 86400
+            delta=datetime.timedelta(seconds=secs) 
             for f in t['files']:
                 print os.path.basename(f['path'])
             print t['gid'],delta,"\t%dk/s"%(speed/1024),"\t%s/%s"%(sizeof_fmt(completed),sizeof_fmt(total))
@@ -41,11 +41,17 @@ class Aria2:
     def remove(self,gid):
         self.proxy.aria2.remove(gid)
 
-    def addUri(self,uris):
-        if isinstance(uris,list):
-            self.proxy.aria2.addUri(uris)
+    def addUri(self,uris,options=None):
+        if not isinstance(uris,list):
+            uris=[uris]
+        if options:
+            self.proxy.aria2.addUri(uris,options)
         else:
-            self.proxy.aria2.addUri([uris])
+            self.proxy.aria2.addUri(uris)
+
+    def addTorrent(self,torrent):
+        self.proxy.aria2.addTorrent(xmlrpclib.Binary(open(torrent).read()))
+
 
 PORT=os.environ.get('PORT_WWW') or os.environ.get('PORT_PROXY') or 80
 JSON_RPC_URL='http://localhost:%s/__jsonrpc'%PORT
@@ -141,6 +147,8 @@ if __name__ == '__main__':
         HttpTask.list(status)
     elif 'abort'==action:
         HttpTask.abort(int(params))
+    elif 'del'==action:#back compatible
+        HttpTask.remove(int(params))
     elif 'remove'==action:
         HttpTask.remove(int(params))
     elif 'aria'==action:
@@ -149,4 +157,8 @@ if __name__ == '__main__':
         upload(params,action)
     else:
         logging.info('unknow parameters:%s',argv)
+        logging.info('only support the following commands')
+        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>')
+        logging.info('********************************************')
+        logging.info('rpc aria ls\nrpc aria add <url>')
 
