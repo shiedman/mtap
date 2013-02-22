@@ -12,7 +12,7 @@ cp -a proxy/* ./
 echo "*** clear tmp files ***"
 rm proxy -rf
 python updateFile.py
-rm -f lib/dotcloud.js updateFile.py
+rm -f  updateFile.py
 echo "*** restart application ***"
 pid=$(ps -ef|grep app.js|grep -v grep|awk '{print $2}')
 
