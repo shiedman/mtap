@@ -15,5 +15,5 @@ class GlobalConfig(object):
         self.key = self.path_to('dotcloud.key')
         self.load()
 
-dotcloud/ui/cli.py
+4.dotcloud/ui/cli.py
 line 435: if True or self.confirm(
