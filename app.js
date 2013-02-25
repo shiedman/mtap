@@ -244,7 +244,7 @@ app.post('/info',function(req,res){
             console.error(err);
         }
     }
-    res.redirect('/info');
+    res.redirect('/');
 });
 app.get(/^\/delete\/(.+)$/,function(req,res){
     try{
@@ -306,6 +306,7 @@ if(SERVER){
         app:app,
         server:httpserver,
         shell:'bash',
+        cwd: '/home/dotcloud/data/downloads',
         port: PORT
     });
     ttyapp.listen();

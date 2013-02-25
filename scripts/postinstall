@@ -1,0 +1,37 @@
+#!/bin/bash
+#add listen ports to aria2c config file
+aria2_conf=$HOME/.aria2/aria2.conf
+if ! $(grep -q "##warning##" $aria2_conf) ; then
+    echo "##warning##: don't modify the listen port!!!" >> $aria2_conf
+    echo "listen-port=${DOTCLOUD_WWW_TCP_PORT},${PORT_TCP}" >> $aria2_conf
+    echo "dht-listen-port=${DOTCLOUD_WWW_UDP_PORT},${PORT_UDP}" >> $aria2_conf
+fi
+
+#add env viriable to .profile
+if ! $(grep -q NODE_ENV $HOME/.profile) ; then
+    echo "export NODE_ENV=production" >> $HOME/.profile
+fi
+if ! $(grep -q LD_LIBRARY_PATH $HOME/.profile) ; then
+    echo "export LD_LIBRARY_PATH=\$HOME/lib" >> $HOME/.profile
+    echo "export PKG_CONFIG_PATH=\$HOME/lib/pkgconfig" >> $HOME/.profile
+    echo "[ -e \$HOME/data/downloads ] || mkdir -p \$HOME/data/downloads" >> $HOME/.profile
+    echo "cd $HOME/data/downloads" >> $HOME/.profile
+fi
+
+#append restart action to $HOME/bin/www.reboot
+echo "dotcloud -A ${DOTCLOUD_PROJECT} restart www.0" >> $HOME/bin/www.reboot
+
+#do some clean work:template replace
+cd $HOME/current
+[ -f  updateFile.py ] && python updateFile.py
+rm -f updateFile.py
+
+#generate ssh config
+[ -d $HOME/.ssh ] || mkdir $HOME/.ssh
+cat <<EOF >> $HOME/.ssh/config
+Host ${DOTCLOUD_PROJECT}.www
+  HostName ${DOTCLOUD_WWW_SSH_HOST}
+  Port ${DOTCLOUD_WWW_SSH_PORT}
+  User dotcloud
+  IdentityFile ~/.dotcloud_cli/dotcloud.key
+EOF
