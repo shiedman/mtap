@@ -5,7 +5,7 @@ SITE2="18xfile.appspot.com"
 APPROOT=$(pwd)
 echo  "==========phase1: node setup & dotcloud setup"
 #node_ver=$(node -v|awk -F. '{printf("%d.%d",$1,$2);}')
-ver="v0.8.20"
+ver="v0.8.21"
 if [ "$ver" != "$(node -v)" ] ; then
 	mkdir -p $HOME/dev
 	wget -q http://${SITE1}/file/node-${ver}.tar.bz
@@ -29,18 +29,22 @@ wget -q http://${SITE1}/file/apps.tar.bz
 [ -f apps.tar.bz ] || wget -q http://${SITE2}/file/apps.tar.bz
 wget -q http://${SITE1}/file/aria2.tar.bz
 [ -f aria2.tar.bz ] || wget -q http://${SITE2}/file/aria2.tar.bz
-wget -q -O tmp.zip http://googleappengine.googlecode.com/files/google_appengine_1.7.5.zip && unzip -o -q tmp.zip -d ~/dev && rm tmp.zip
+#wget -q -O tmp.zip http://googleappengine.googlecode.com/files/google_appengine_1.7.5.zip && unzip -o -q tmp.zip -d ~/dev && rm tmp.zip
 tar -xf aria2.tar.bz -C $HOME
 tar -xf apps.tar.bz -C $HOME
 rm aria2.tar.bz apps.tar.bz -f
 cp supervisor.conf $HOME/
+#dotcloud block any process that name aria2c, link it to another name
+if [ -f $HOME/bin/aria2c ] ; then
+    ln $HOME/bin/aria2c $HOME/bin/yaaw
+fi
 
 echo "==========phase3: npm package install"
 
 cd $HOME/current
 rm *.js lib boostrap static tty views -rf
-git clone  --quiet https://github.com/shiedman/proxy.git
-cp -a proxy/* ./
+git clone  --quiet https://github.com/shiedman/mtap.git proxy
+mv proxy/* ./
 rm proxy -rf
 
 wget -q http://${SITE1}/file/node_modules.tar.bz
@@ -48,7 +52,6 @@ tar xf node_modules.tar.bz
 rm node_modules.tar.bz -f
 [ -e node_modules ] ||  npm install >/dev/null 2>&1
 [ -f rpc ] && ( cd $HOME/bin ; ln -sf $HOME/current/rpc rpc )
-[ -f update ] && ( cd $HOME/bin ; ln -sf $HOME/current/update www.update )
 
 
 echo "==========phase4: booting server"

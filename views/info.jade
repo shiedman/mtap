@@ -2,27 +2,27 @@ extends layout
 
 block nav.info
   li.active
-    a(href='/info') info 
+    a(href='/info') info
 
 block content
   div.container
     div.alert.alert-info
       strong host's info
       pre
-        |ssh: #{conf.ssh_url} 
+        |ssh: #{conf.ssh_url}
         a(href='/dotcloud.ppk',title='本服务器的putty密钥') [dotcloud.ppk]
-        | 
+        |
         |proxy: #{conf.proxy_url}
-        |goagent: #{conf.http_url}agentfetch 
+        |goagent: #{conf.http_url}agentfetch
         a(href='/goagent/proxy.ini',title='goagent的配置文件') [proxy.ini]
-        | 
-        |wallproxy: #{conf.http_url}wallfetch 
+        |
+        |wallproxy: #{conf.http_url}wallfetch
         a(href='/wallproxy/proxy.ini',title='wallproxy的配置文件1') [proxy.ini]
         a(href='/wallproxy/gui.ini',title='wallproxy的配置文件2') [gui.ini]
 
     div.alert.alert-info
       form#form1(method='post')
-        strong y2proxy.ini
-        input.btn.btn-primary(type='submit',value='save') 
+        strong config.ini
+        input.btn.btn-primary(type='submit',value='save')
         a.btn.btn-primary.btn-mini(target='_blank',href='/info/demo.ini') 示例文件
         textarea#ini(name='ini',rows='18',style='width:100%')=conf.ini

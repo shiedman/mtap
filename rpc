@@ -11,7 +11,6 @@ def sizeof_fmt(num):
 class Aria2:
     def __init__(self):
         self.proxy=xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-        #self.proxy=xmlrpclib.ServerProxy('http://otaku-yaru.dotcloud.com/rpc_')
 
     def actives(self):
         tasks=self.proxy.aria2.tellActive()
@@ -21,7 +20,7 @@ class Aria2:
             completed=int(t['completedLength'])
             speed=int(t['downloadSpeed'])
             secs=(total-completed)/speed if speed else 86400
-            delta=datetime.timedelta(seconds=secs) 
+            delta=datetime.timedelta(seconds=secs)
             for f in t['files']:
                 print os.path.basename(f['path'])
             print t['gid'],delta,"\t%dk/s"%(speed/1024),"\t%s/%s"%(sizeof_fmt(completed),sizeof_fmt(total))
@@ -54,7 +53,7 @@ class Aria2:
 
 
 PORT=os.environ.get('PORT_WWW') or os.environ.get('PORT_PROXY') or 80
-JSON_RPC_URL='http://localhost:%s/__jsonrpc'%PORT
+JSON_RPC_URL='http://localhost:%s/API/JSONRPC'%PORT
 def jsonRPC(method,params=None,endpoint=JSON_RPC_URL):
     if not isinstance(method,str):
         raise Exception('Invalid method supplied for jsonRPC request')

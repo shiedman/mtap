@@ -1,12 +1,13 @@
-node.js@dotcloud
-================
+more than another proxy
+=======================
 1. proxy
 http/https/socks5
 goagent/wallproxy
 
 2. offline downloader
 
-3. dotcloud/ui/config.py
+3. copy to other sites
+dotcloud/ui/config.py
 class GlobalConfig(object):
     def __init__(self):
         #self.dir = os.path.expanduser('~/.dotcloud_cli')
@@ -15,5 +16,6 @@ class GlobalConfig(object):
         self.key = self.path_to('dotcloud.key')
         self.load()
 
-4.dotcloud/ui/cli.py
-line 435: if True or self.confirm(
+dotcloud/ui/cli.py
+line 435: if True or self.confirm(....
+

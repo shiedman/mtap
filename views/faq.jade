@@ -2,7 +2,7 @@ extends layout
 
 block nav.faq
   li.active
-    a(href='/faq') faq 
+    a(href='/faq') faq
 
 block content
   div.container
@@ -11,14 +11,14 @@ block content
       p 登录服务器后（网页登录或者ssh登录)，敲入命令: www.reboot
     div
       p.lead 二、下载文件保存在哪里？
-      p 下载的文件存放在: <a target='_blank' href='/downloads/'>/home/dotcloud/data/downloads/</a>
+      p 下载的文件存放在: <a target='_blank' href='/downloads/'>#{info.download_dir}</a>
     div
       p.lead 三、如何删除下载任务？
       p 登录服务器后（网页登录或者ssh登录)，敲入命令: rpc del <任务id>。任务id就是tasks区下载文件名前的序号。
     div
       p.lead 四、<a href='http://code.google.com/p/wallproxy-plus'>wallproxy</a>如何配置
       ol
-        li 下载wallproxy 2.1.3+: 
+        li 下载wallproxy 2.1.14.4:
           a(href='http://goo.gl/dFtij') http://goo.gl/dFtij
         li 解压文件，进入local目录
         li 下载
@@ -29,8 +29,8 @@ block content
     div
       p.lead  五、<a href='http://code.google.com/p/goagent'>goagent</a>如何配置
       ol
-        li 下载goagent 2.1.5+: 
-          a(href='http://goo.gl/sxgfB') http://goo.gl/sxgfB
+        li 下载goagent 2.1.12:
+          a(href='https://nodeload.github.com/goagent/goagent/legacy.zip/2.0') https://goo.gl/sxgfB
         li 解压文件，进入local目录
         li 下载
           a(href='/goagent/proxy.ini') proxy.ini
@@ -41,7 +41,7 @@ block content
         li putty下载页面: http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
           br
           |下载putty.exe: http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe
-        li 下载本服务器putty密钥: 
+        li 下载本服务器putty密钥:
           a(href='/dotcloud.ppk') dotcloud.ppk
         li 运行putty.exe
           div
@@ -51,13 +51,13 @@ block content
             img(src='/img/putty2.png')
             div c.填写登录服务器地址、端口
             pre(style='width:400px')
-              |Host Name: 
+              |Host Name:
               strong #{info.ssh_host}
-              | 
-              |Port: 
+              |
+              |Port:
               strong #{info.ssh_port}
-              | 
-              |Saved Sessions: 
+              |
+              |Saved Sessions:
               strong #{info.appname}
             img(src='/img/putty3.png')
         li 保存后，双击<strong>#{info.appname}</strong>即可ssh登录本服务器
