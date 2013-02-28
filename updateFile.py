@@ -6,8 +6,8 @@ if 'DOTCLOUD_PROJECT' in os.environ:title=os.environ['DOTCLOUD_PROJECT']
 with open('views/layout.jade','rb') as f:lines=f.read()
 out=open('views/layout.jade','wb')
 for line in lines.splitlines(True):
-    if line.find('y2proxy_')>0:
-        line=line.replace('y2proxy_','y2proxy@'+title)
+    if line.find('mtap_')>0:
+        line=line.replace('mtap_','mtap@'+title)
     out.write(line)
 out.close()
 

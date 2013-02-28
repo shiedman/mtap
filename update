@@ -1,11 +1,10 @@
 #!/bin/bash
-source ~/.dotcloud_profile
+[ -f ~/.dotcloud_profile ] && source ~/.dotcloud_profile
 cd $HOME/current
 rm proxy -rf
-#mv views/layout.jade ./
 echo "*** downloading file ***"
-git clone https://github.com/shiedman/proxy.git
-[ -f y2proxy.ini ] && rm -f proxy/y2proxy.ini
+git clone https://github.com/shiedman/mtap.git proxy
+[ -f config.ini ] && rm -f proxy/config.ini
 [ -f update ] && rm -f proxy/update
 cp -a proxy/* ./
 [ -f package.json ] && npm install
@@ -15,7 +14,4 @@ python updateFile.py
 rm -f  updateFile.py
 echo "*** restart application ***"
 pid=$(ps -ef|grep app.js|grep -v grep|awk '{print $2}')
-
-if [ -n "$pid" ]; then
-    kill $pid
-fi
+[ -n "$pid" ] && kill $pid

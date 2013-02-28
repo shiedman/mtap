@@ -2,11 +2,11 @@ doctype 5
 html
   head
     meta(charset='utf-8')
-    title y2proxy_
+    title mtap_
     link(rel='stylesheet', href='/css/bootstrap.min.css')
     style
         body{padding-top: 40px;}
-    block head 
+    block head
   body
     div.navbar.navbar-inverse.navbar-fixed-top
         div.navbar-inner
@@ -15,7 +15,7 @@ html
                     span.icon-bar
                     span.icon-bar
                     span.icon-bar
-                a.brand(href='#') Downloader
+                a.brand(href='#',title='more than another proxy') MTAP
                 div.nav-collapse.collapse
                     ul.nav
                         block nav.files
@@ -26,16 +26,16 @@ html
                               a(href='/tasks') tasks
                         block nav.aria2
                           li
-                              a(href='/aria2') aria2
+                              a(href='/aria2/') aria2
                         block nav.info
                           li
-                              a(href='/info') info 
+                              a(href='/info') info
                         block nav.faq
                           li
                               a(href='/faq') faq
                         block nav.tty
                           li
-                              a(href='/tty') tty
+                              a(href='/tty/') tty
                         block nav.admin
                           li
                               a(href='/admin') admin

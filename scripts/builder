@@ -1,0 +1,69 @@
+#!/bin/bash
+#cd $SERVICE_APPROOT
+SITE1="admin-nana.dotcloud.com"
+SITE2="18xfile.appspot.com"
+APPROOT=$(pwd)
+echo  "==========phase1: node setup & dotcloud setup"
+#node_ver=$(node -v|awk -F. '{printf("%d.%d",$1,$2);}')
+ver="v0.8.21"
+if [ "$ver" != "$(node -v)" ] ; then
+	mkdir -p $HOME/dev
+	wget -q http://${SITE1}/file/node-${ver}.tar.bz
+    [ -f node-${ver}.tar.bz ] || wget -q http://${SITE2}/file/node-${ver}.tar.bz
+	tar -xf node-${ver}.tar.bz -C $HOME/dev
+	rm node-${ver}.*
+	cd $HOME/dev/node*
+	rm /opt/node/* -rf
+	make install >/dev/null
+	cd $APPROOT
+	rm $HOME/dev -rf
+	(cd $HOME ; [ ! -d env ] && virtualenv env)
+	. $HOME/env/bin/activate
+	pip install dotcloud --quiet
+fi
+echo  "==========phase2: download file & config"
+[ -e $HOME/current ] || mkdir $HOME/current
+[ -e $HOME/dev ] || mkdir $HOME/dev
+[ -e $HOME/data/downloads ] || mkdir -p $HOME/data/downloads
+wget -q http://${SITE1}/file/apps.tar.bz
+[ -f apps.tar.bz ] || wget -q http://${SITE2}/file/apps.tar.bz
+wget -q http://${SITE1}/file/aria2.tar.bz
+[ -f aria2.tar.bz ] || wget -q http://${SITE2}/file/aria2.tar.bz
+#wget -q -O tmp.zip http://googleappengine.googlecode.com/files/google_appengine_1.7.5.zip && unzip -o -q tmp.zip -d ~/dev && rm tmp.zip
+tar -xf aria2.tar.bz -C $HOME
+tar -xf apps.tar.bz -C $HOME
+rm aria2.tar.bz apps.tar.bz -f
+cp supervisor.conf $HOME/
+#dotcloud block any process that name aria2c, link it to another name
+if [ -f $HOME/bin/aria2c ] ; then
+    ln $HOME/bin/aria2c $HOME/bin/yaaw
+fi
+
+echo "==========phase3: npm package install"
+
+cd $HOME/current
+rm *.js lib boostrap static tty views -rf
+git clone  --quiet https://github.com/shiedman/mtap.git proxy
+mv proxy/* ./
+rm proxy -rf
+
+wget -q http://${SITE1}/file/node_modules.tar.bz
+tar xf node_modules.tar.bz
+rm node_modules.tar.bz -f
+[ -e node_modules ] ||  npm install >/dev/null 2>&1
+[ -f rpc ] && ( cd $HOME/bin ; ln -sf $HOME/current/rpc rpc )
+
+
+echo "==========phase4: booting server"
+
+if [ -f $APPROOT/.local/dotcloud.key ] ; then
+    cd $HOME
+    [ -e .dotcloud_cli ] || mkdir .dotcloud_cli
+    cp -f $APPROOT/.local/* .dotcloud_cli/
+    chmod 600 .dotcloud_cli/dotcloud.key
+    chmod 644 .dotcloud_cli/config
+    if [ -f bin/puttygen ] ; then
+        bin/puttygen .dotcloud_cli/dotcloud.key -O private -o current/static/dotcloud.ppk -C "putty dotcloud key"
+    fi
+fi
+

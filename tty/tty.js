@@ -31,11 +31,11 @@ function Server(conf) {
   var self = this
     , conf = config.checkConfig(conf);
 
-  this.app = conf.app || express.createServer();
-  this.server = conf.server || ( conf.https && conf.https.key
+  this.app = conf.express || express();
+  this.server = conf.https && conf.https.key
     ? require('https').createServer(conf.https)
-    : require('http').createServer() );
-  if(!conf.app)this.server.on('request', this.app);
+    : require('http').createServer() ;
+  this.server.on('request', this.app);
 
   this.sessions = {};
   this.conf = conf;
@@ -54,7 +54,7 @@ function Server(conf) {
 Server.prototype.init = function() {
   this.init = function() {};
   if (this.conf.localOnly) this.initLocal();
-  //disable middleware config by tty.js
+  //disable middleware config by tty.js, author:shiedman
   //this.initMiddleware();
   this.initRoutes();
   this.initIO();

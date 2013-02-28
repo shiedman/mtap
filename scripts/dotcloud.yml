@@ -1,0 +1,14 @@
+www:
+    type: custom
+    buildscript: builder
+    #approot: y2proxy
+    ports:
+        www: http
+        proxy: tcp
+        tcp: tcp
+        udp: udp
+        other: tcp
+#    systempackages:
+#        - libevent-dev
+#        - zlib1g-dev
+#        - wine
