@@ -186,6 +186,8 @@ app.post('/API/JSONRPC',function(req,res){
         var rtn=0;
         if(method=='httptask.deleteTask'){
             rtn=httptask.deleteTask(params.taskid);
+        }else if(method=='httptask.addTask'){
+            rtn=httptask.queueDownload([proxy.download,params.url,{'Cookie':params.cookie},params.file]);
         }else if(method=='httptask.abortTask'){
             rtn=httptask.abortTask(params.taskid);
         }else if(method=='httptask.listTask'){
@@ -194,7 +196,7 @@ app.post('/API/JSONRPC',function(req,res){
         }else if(method.search(/\.upload$/)>0){
             var func=site[method];
             if(typeof func!='function') throw new Error('upload:'+method+' not exists');
-            httptask.queue(func,[params.file]);
+            httptask.queueUpload(func,params.file);
         }else{
             throw new Error('method:'+method+' not exists');
         }

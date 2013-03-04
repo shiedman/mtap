@@ -102,6 +102,21 @@ class HttpTask:
                 logging.info(e)
                 logging.info('=========================================')
 
+    @staticmethod
+    def add(params):
+        payload={'url':params[0]}
+        if '--cookie' in params:
+            payload['cookie']=params[params.index('--cookie')+1]
+        if '--file' in params:
+            payload['file']=params[params.index('--file')+1]
+        rtn=jsonRPC('httptask.addTask',payload)
+        if not rtn:return
+        if 'error' in rtn:
+            logging.error('failed to add %s:%s',payload['url'],rtn['error']['message'])
+        else:
+            logging.info('added: %s',payload['url'])
+
+
 def upload(filepath,method):
     #check filepath exists
     if not filepath or not os.path.exists(filepath):
@@ -150,6 +165,8 @@ if __name__ == '__main__':
         HttpTask.remove(int(params))
     elif 'remove'==action:
         HttpTask.remove(int(params))
+    elif 'add'==action:
+        HttpTask.add(argv[2:])
     elif 'aria'==action:
         aria2_rpc(argv[2:])
     elif re.match(r'.+\.upload$',action):
@@ -157,7 +174,7 @@ if __name__ == '__main__':
     else:
         logging.info('unknow parameters:%s',argv)
         logging.info('only support the following commands')
-        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>')
+        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url> [--cookie <cookie string>] [--file <save filename>]')
         logging.info('********************************************')
         logging.info('rpc aria ls\nrpc aria add <url>')
 
