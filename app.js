@@ -187,7 +187,7 @@ app.post('/API/JSONRPC',function(req,res){
         if(method=='httptask.deleteTask'){
             rtn=httptask.deleteTask(params.taskid);
         }else if(method=='httptask.addTask'){
-            rtn=httptask.queueDownload([proxy.download,params.url,{'Cookie':params.cookie},params.file]);
+            rtn=httptask.queueDownload([proxy.download,params.url,{'Cookie':params.cookie},params.output]);
         }else if(method=='httptask.abortTask'){
             rtn=httptask.abortTask(params.taskid);
         }else if(method=='httptask.listTask'){

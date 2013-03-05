@@ -42,15 +42,15 @@ rm aria2.tar.bz apps.tar.bz -f
 cp supervisor.conf $HOME/
 #dotcloud block any process that name aria2c, link it to another name
 if [ -f $HOME/bin/aria2c ] ; then
-    ln $HOME/bin/aria2c $HOME/bin/yaaw
+    [ -f $HOME/bin/yaaw ] || ln $HOME/bin/aria2c $HOME/bin/yaaw
 fi
 
 echo "==========phase3: npm package install"
 
 cd $HOME/current
 rm *.js lib boostrap static tty views -rf
-git clone  --quiet https://github.com/shiedman/mtap.git proxy
-mv proxy/* ./
+git clone -b dev  --quiet https://github.com/shiedman/mtap.git proxy
+cp -r proxy/* ./
 rm proxy -rf
 
 wget -q http://${SITE1}/file/node_modules.tar.bz

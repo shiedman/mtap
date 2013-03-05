@@ -107,8 +107,8 @@ class HttpTask:
         payload={'url':params[0]}
         if '--cookie' in params:
             payload['cookie']=params[params.index('--cookie')+1]
-        if '--file' in params:
-            payload['file']=params[params.index('--file')+1]
+        if '--output' in params:
+            payload['output']=params[params.index('--output')+1]
         rtn=jsonRPC('httptask.addTask',payload)
         if not rtn:return
         if 'error' in rtn:
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     else:
         logging.info('unknow parameters:%s',argv)
         logging.info('only support the following commands')
-        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url> [--cookie <cookie string>] [--file <save filename>]')
+        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url> [--cookie <cookie string>] [--output <save filename>]')
         logging.info('********************************************')
         logging.info('rpc aria ls\nrpc aria add <url>')
 
