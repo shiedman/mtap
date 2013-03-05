@@ -226,6 +226,15 @@ app.get('/_versions',function(req,res){
     res.writeHead(200,{'Content-Type':'text/plain'});
     res.end(JSON.stringify(process.versions,null,2));
 });
+app.get('/_process',function(req,res){
+    var cmd=process.platform=='win32'?'tasklist':'ps -ef';
+    var exec = require('child_process').exec;
+    exec(cmd, function(err, stdout, stderr) {
+        res.set('Content-Type','text/plain');
+        if(err){ return res.send(500,err); }
+        res.send(200,stdout);
+    });
+});
 
 app.get('/faq',function(req,res){
     var ssh_host=process.env.DOTCLOUD_WWW_SSH_HOST||'demo-nana.dotcloud.com';
@@ -298,6 +307,18 @@ app.get(/^\/delete\/(.+)$/,function(req,res){
     }
 });
 
+app.post('/_upload',function(req,res){
+    var upload_dir=path.join(ut.env.ROOT_DIR,'uploads');
+    if(!fs.existsSync(upload_dir))fs.mkdirSync(upload_dir);
+    for(var k in req.files){
+        var f=req.files[k];
+        fout=fs.createWriteStream(path.join(upload_dir,f.name));
+        fin=fs.createReadStream(f.path);
+        fin.pipe(fout);
+        logger.info('saving %s',f.name);
+    }
+    res.send('upload done\r\n');
+});
 
 /** server is ready for http request**/
 if(SERVER_PORT){

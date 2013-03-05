@@ -17,9 +17,15 @@ if [ "$ver" != "$(node -v)" ] ; then
 	make install >/dev/null
 	cd $APPROOT
 	rm $HOME/dev -rf
-	(cd $HOME ; [ ! -d env ] && virtualenv env)
+#	(cd $HOME ; [ ! -d env ] && virtualenv env)
+    #set python2.7 as default env python interpreter
+    curl -O https://raw.github.com/pypa/virtualenv/master/virtualenv.py
+    python2.7 virtualenv.py --distribute $HOME/env
+    rm virtualenv.py
 	. $HOME/env/bin/activate
 	pip install dotcloud --quiet
+    #set  ruby1.9.2 as default ruby interpreter
+    rvm use 1.9.2 --default
 fi
 echo  "==========phase2: download file & config"
 [ -e $HOME/current ] || mkdir $HOME/current

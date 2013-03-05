@@ -30,7 +30,7 @@ function Server(conf) {
 
   var self = this
     , conf = config.checkConfig(conf);
-
+  //#shiedman
   this.app = conf.express || express();
   this.server = conf.https && conf.https.key
     ? require('https').createServer(conf.https)
@@ -54,7 +54,7 @@ function Server(conf) {
 Server.prototype.init = function() {
   this.init = function() {};
   if (this.conf.localOnly) this.initLocal();
-  //disable middleware config by tty.js, author:shiedman
+  //disable middleware config by tty.js #shiedman
   //this.initMiddleware();
   this.initRoutes();
   this.initIO();
@@ -117,6 +117,7 @@ Server.prototype.setAuth = function(func) {
 
 Server.prototype.initRoutes = function() {
   var self = this;
+  //#shiedman
   this.get('/options.js', function(req, res, next) {
     var setHeader = res.setHeader;
     res.setHeader = function(name) {
@@ -165,6 +166,11 @@ Server.prototype.initIO = function() {
 
   io.configure(function() {
     io.disable('log');
+	//socket.io support on heroku #shiedman
+	if(process.env.PORT){
+		io.set("transports", ["xhr-polling"]);
+		io.set("polling duration", 10);
+	}
   });
 
   io.set('authorization', function(data, next) {
