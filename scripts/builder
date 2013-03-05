@@ -19,7 +19,7 @@ if [ "$ver" != "$(node -v)" ] ; then
 	rm $HOME/dev -rf
 #	(cd $HOME ; [ ! -d env ] && virtualenv env)
     #set python2.7 as default env python interpreter
-    curl -O https://raw.github.com/pypa/virtualenv/master/virtualenv.py
+    wget -q https://raw.github.com/pypa/virtualenv/master/virtualenv.py
     python2.7 virtualenv.py --distribute $HOME/env
     rm virtualenv.py
 	. $HOME/env/bin/activate
