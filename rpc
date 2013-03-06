@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import xmlrpclib,urllib2
 import os,sys,json,datetime,logging,re
+PORT=os.environ.get('PORT_WWW') or os.environ.get('PORT_PROXY') or 80
+JSON_RPC_URL='http://localhost:%s/API/JSONRPC'%PORT
+
 def sizeof_fmt(num):
     for x in ['bytes','KB','MB','GB','TB']:
         if num < 1024.0:
@@ -52,8 +55,6 @@ class Aria2:
         self.proxy.aria2.addTorrent(xmlrpclib.Binary(open(torrent).read()))
 
 
-PORT=os.environ.get('PORT_WWW') or os.environ.get('PORT_PROXY') or 80
-JSON_RPC_URL='http://localhost:%s/API/JSONRPC'%PORT
 def jsonRPC(method,params=None,endpoint=JSON_RPC_URL):
     if not isinstance(method,str):
         raise Exception('Invalid method supplied for jsonRPC request')

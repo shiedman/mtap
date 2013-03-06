@@ -3,6 +3,9 @@
  * main module
  */
 
+//set timezone to +8000
+process.env.TZ='Asia/Shanghai';
+
 var express = require('express')
   , http = require('http')
   , net = require('net')
