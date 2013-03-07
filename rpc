@@ -11,7 +11,7 @@ def sizeof_fmt(num):
             return "%3.2f%s" % (num, x)
         num /= 1024.0
 
-class Aria2:
+class Aria2c:
     def __init__(self):
         self.proxy=xmlrpclib.ServerProxy('http://localhost:6800/rpc')
 
@@ -53,6 +53,34 @@ class Aria2:
 
     def addTorrent(self,torrent):
         self.proxy.aria2.addTorrent(xmlrpclib.Binary(open(torrent).read()))
+
+
+def parseInput(filepath):
+    downloads=[]
+    dl={}
+    for line in open(filepath,'rb'):
+        if line[:4]=='http':
+            #download url
+            url=line.strip()
+            if dl.get('url'):
+                downloads.append(dl)
+                dl={}
+            dl['url']=url
+        elif (line[0]==' ' or line[0]=='\t') and line.find('=')>0:
+            #options
+            k,_,v=line.strip().partition('=')
+            if k not in dl:
+                dl[k]=v
+            else:
+                oldvalue=dl[k]
+                if isinstance(oldvalue,list):
+                    oldvalue.append(v)
+                else:
+                    dl[k]=[oldvalue,v]
+    if dl.get('url'):
+        downloads.append(dl)
+
+    return downloads
 
 
 def jsonRPC(method,params=None,endpoint=JSON_RPC_URL):
@@ -104,18 +132,24 @@ class HttpTask:
                 logging.info('=========================================')
 
     @staticmethod
-    def add(params):
-        payload={'url':params[0]}
-        if '--cookie' in params:
-            payload['cookie']=params[params.index('--cookie')+1]
-        if '--output' in params:
-            payload['output']=params[params.index('--output')+1]
-        rtn=jsonRPC('httptask.addTask',payload)
-        if not rtn:return
-        if 'error' in rtn:
-            logging.error('failed to add %s:%s',payload['url'],rtn['error']['message'])
+    def add(argv):
+        if argv[0]=='--input':
+            filepath=argv[1]
+            for payload in parseInput(filepath):
+                rtn=jsonRPC('httptask.addTask',payload)
+                if not rtn:return
+                if 'error' in rtn:
+                    logging.error('failed to add %s:%s',payload['url'],rtn['error']['message'])
+                else:
+                    logging.info('added: %s',payload['url'])
         else:
-            logging.info('added: %s',payload['url'])
+            payload={'url':argv[0]}
+            if not rtn:return
+            if 'error' in rtn:
+                logging.error('failed to add %s:%s',payload['url'],rtn['error']['message'])
+            else:
+                logging.info('added: %s',payload['url'])
+
 
 
 def upload(filepath,method):
@@ -130,8 +164,8 @@ def upload(filepath,method):
     else:
         logging.info('uploading file:%s',filepath)
 
-def aria2_rpc(argv):
-    rpc=Aria2()
+def aria2c_rpc(argv):
+    rpc=Aria2c()
     act=argv[0]
     if act=='ls':
         rpc.actives()
@@ -140,12 +174,12 @@ def aria2_rpc(argv):
     elif act=='del' and len(argv)==2:
         rpc.remove(argv[1])
     elif act=='add' and len(argv)>=2:
-        if argv[1]=='--file':
-            with open(argv[2],'r') as f:
-                lines=[l.strip() for l in f.read().splitlines()]
-            urls=[line for line in lines if len(line)>0]
-            for url in urls: rpc.addUri([url])
-            logging.info('download:%s',urls)
+        if argv[1]=='--input':
+            filepath=argv[2]
+            for d in parseInput(filepath):
+                url=d['url']
+                del d['url']
+                rpc.addUri(url,d)
         else:
             rpc.addUri(argv[1:])
             logging.info('download:%s',argv[1:])
@@ -168,14 +202,14 @@ if __name__ == '__main__':
         HttpTask.remove(int(params))
     elif 'add'==action:
         HttpTask.add(argv[2:])
-    elif 'aria'==action:
-        aria2_rpc(argv[2:])
+    elif 'aria2c'==action:
+        aria2c_rpc(argv[2:])
     elif re.match(r'.+\.upload$',action):
         upload(params,action)
     else:
         logging.info('unknow parameters:%s',argv)
         logging.info('only support the following commands')
-        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url> [--cookie <cookie string>] [--output <save filename>]')
+        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url>\nrpc add --input <file>')
         logging.info('********************************************')
-        logging.info('rpc aria ls\nrpc aria add <url>')
+        logging.info('rpc aria2c ls\nrpc aria2c add <url>\nrpc aria2c add --input <file>')
 
