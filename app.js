@@ -191,19 +191,7 @@ app.post('/API/JSONRPC',function(req,res){
             rtn=httptask.deleteTask(params.taskid);
         }else if(method=='httptask.addTask'){
             //params is the same format as aria2c input file
-            var headerList=params['header']||[];
-            if(typeof headerList == 'string'){
-                headerList=[headerList];
-            }
-            var headers={};
-            for(var i=0;i<headerList.length;i++){
-                var s=headerList[i];
-                var n=s.indexOf(':'),k=s.substring(0,n),v=s.substring(n+1);
-                if(n>0){
-                    headers[k.trim()]=v.trim();
-                }
-            }
-            rtn=httptask.queueDownload([proxy.download,params.url,headers,params.output]);
+            rtn=httptask.queueDownload([proxy.download,params]);
         }else if(method=='httptask.abortTask'){
             rtn=httptask.abortTask(params.taskid);
         }else if(method=='httptask.listTask'){

@@ -29,17 +29,6 @@ class Aria2c:
             print t['gid'],delta,"\t%dk/s"%(speed/1024),"\t%s/%s"%(sizeof_fmt(completed),sizeof_fmt(total))
             print '==================================================='
 
-    def stops(self):
-        tasks=self.proxy.aria2.tellStopped(0,10)
-        print '+++++++stopped tasks++++++'
-        for t in tasks:
-            total=int(t['totalLength'])
-            completed=int(t['completedLength'])
-            for f in t['files']:
-                print os.path.basename(f['path'])
-            print t['gid'],'--','--',"%s/%s"%(sizeof_fmt(completed),sizeof_fmt(total))
-            print '==================================================='
-
     def remove(self,gid):
         self.proxy.aria2.remove(gid)
 
@@ -166,23 +155,28 @@ def upload(filepath,method):
 
 def aria2c_rpc(argv):
     rpc=Aria2c()
-    act=argv[0]
-    if act=='ls':
+    if len(argv)==0:
         rpc.actives()
-    elif act=='stop':
-        rpc.stops()
-    elif act=='del' and len(argv)==2:
-        rpc.remove(argv[1])
-    elif act=='add' and len(argv)>=2:
-        if argv[1]=='--input':
-            filepath=argv[2]
-            for d in parseInput(filepath):
-                url=d['url']
-                del d['url']
-                rpc.addUri(url,d)
+    elif len(argv)==1:
+        url=argv[0]
+        if url[:7]=='http://' or url[:8]=='https://' or url[:6]=='ftp://' or url[:7]=='megnet:':
+            rpc.adUri(url)
+            logging.info('download: %s',url)
         else:
-            rpc.addUri(argv[1:])
-            logging.info('download:%s',argv[1:])
+            logging.warn('not uri: %s',url)
+    elif len(argv)==2 and argv[0]=='del' :
+        rpc.remove(argv[1])
+    elif len(argv)==2 and argv[0]=='--input':
+        filepath=argv[1]
+        for d in parseInput(filepath):
+            url=d['url']
+            del d['url']
+            rpc.addUri(url,d)
+    elif len(argv)==2 and argv[0]=='--torrent':
+        filepath=argv[1]
+        rpc.addTorrent(filepath)
+    else:
+        logging.warn('unknow options: %s',argv)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')
@@ -211,5 +205,5 @@ if __name__ == '__main__':
         logging.info('only support the following commands')
         logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url>\nrpc add --input <file>')
         logging.info('********************************************')
-        logging.info('rpc aria2c ls\nrpc aria2c add <url>\nrpc aria2c add --input <file>')
+        logging.info('rpc aria2c\nrpc aria2c <url>\nrpc aria2c --input <input file>\nrpc aria2c --torrent <torrent file>')
 
