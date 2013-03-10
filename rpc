@@ -159,8 +159,8 @@ def aria2c_rpc(argv):
         rpc.actives()
     elif len(argv)==1:
         url=argv[0]
-        if url[:7]=='http://' or url[:8]=='https://' or url[:6]=='ftp://' or url[:7]=='megnet:':
-            rpc.adUri(url)
+        if url[:7]=='http://' or url[:8]=='https://' or url[:6]=='ftp://' or url[:7]=='magnet:':
+            rpc.addUri(url)
             logging.info('download: %s',url)
         else:
             logging.warn('not uri: %s',url)
