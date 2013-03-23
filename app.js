@@ -356,9 +356,24 @@ app.post('/uptobox/download',function(req,res){
         console.warn(err);
         res.send('download failed:'+url);
     }
-
 });
 
+app.post('/115/download',function(req,res){
+    var download=site['115.download'];
+    var params={
+        username:req.body.username,
+        password:req.body.password,
+        pickcode:req.body.pickcode,
+        url:'http://115.com/file/'+req.body.pickcode
+    }
+    try{
+        httptask.queueDownload([download,params]);
+        res.send('download begins:'+params.pickcode);
+    }catch(err){
+        console.warn(err);
+        res.send('download failed:'+params.pickcode);
+    }
+});
 
 /** server is ready for http request**/
 if(PORT){
