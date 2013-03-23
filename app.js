@@ -241,9 +241,9 @@ app.get('/_process',function(req,res){
         res.send(200,stdout);
     });
 });
-app.get('/mtap.log',function(req,res){
+app.get('/proxy.log',function(req,res){
     res.set('Content-Type','text/plain; charset=utf-8');
-    res.sendfile(path.join(__dirname, 'mtap.log'));
+    res.sendfile(path.join(__dirname, 'proxy.log'));
 });
 
 app.get('/faq',function(req,res){
@@ -348,6 +348,7 @@ app.post('/xunlei/scan',function(req,res){
 app.post('/uptobox/download',function(req,res){
     try{
         var url=req.body.download_url;
+        if(!url)return res.send('download_url not specified');
         var download=site['uptobox.download'];
         download(url);
         res.send('download begins:'+url);
