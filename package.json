@@ -1,6 +1,6 @@
 {
   "name": "mtap",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "start": "node app"
@@ -11,16 +11,17 @@
   },
   "engines": {
     "node": "0.8.x",
-    "npm":  "1.1.x"
+    "npm":  "1.x"
   },
   "dependencies": {
     "express": "3.x",
-    "iconv":"1.x",
+    "iconv":"2.x",
     "jade": "0.x",
     "tracer":"0.5.x",
     "wrench":"1.x",
     "tough-cookie":"0.9.x",
     "socket.io": "0.9.x",
-    "pty.js": "0.1.x"
+    "pty.js": "0.x",
+    "jsdom": "0.x"
   }
 }

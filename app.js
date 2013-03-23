@@ -5,14 +5,13 @@
 
 //set timezone to +8000
 process.env.TZ='Asia/Shanghai';
-
 var express = require('express')
-  , http = require('http')
-  , net = require('net')
-  , fs = require('fs')
-  , path = require('path')
-  , wrench = require('wrench')
-  , urlparse = require('url').parse;
+    , http = require('http')
+    , net = require('net')
+    , fs = require('fs')
+    , path = require('path')
+    , urlparse = require('url').parse
+    , wrench;// = require('wrench');
 
 var ut=require('./lib/utility.js')
   , logger=ut.logger
@@ -21,23 +20,25 @@ var ut=require('./lib/utility.js')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
-  , site = require('./lib/site.js').site
+  , site = require('./lib/site.js')
   , forward = require('./lib/forward');
 
+/** set concurrent sockets to 10 **/
+http.globalAgent.maxSockets=10;
 ut.ini.load();
-/** create $HOME/data/download if not exists **/
-fs.exists(ut.env.ROOT_DIR,function(exists){
-    if(!exists){ fs.mkdir(ut.env.ROOT_DIR); }
+var PORT=ut.env.PORT_WWW, ROOT=ut.env.ROOT_DIR,DOWNLOAD=ut.env.DOWNLOAD_DIR;
+/** assume DOWNLOAD DIR is subdir of ROOT DIR **/
+fs.exists(DOWNLOAD,function(exists){
+    fs.exists(ROOT,function(exists){
+        if(exists){
+            fs.mkdir(DOWNLOAD);
+        }else{
+            fs.mkdir(ROOT,function(err){ fs.mkdir(DOWNLOAD); });
+        }
+    });
 });
-fs.exists(ut.env.DOWNLOAD_DIR,function(exists){
-    if(!exists){ setTimeout(function(){fs.mkdir(ut.env.DOWNLOAD_DIR);},3000);}
-});
-var PORT=80 , ROOT=ut.env.ROOT_DIR;
-//dotcloud or appfog or heroku
-var SERVER_PORT=ut.env.PORT_WWW;
-if(SERVER_PORT){
-    PORT=SERVER_PORT;
-    //process.on('SIGINT', function () { console.log(' Press Control-D to exit.'); }); 
+if(PORT){
+    //process.on('SIGINT',function (){ console.log(' Press Control-D to exit.');}); 
     process.on('SIGTERM',function(){
         logger.warn('Server is exiting....');
         ut.ini.write();
@@ -55,10 +56,7 @@ if(SERVER_PORT){
         }
     });
     /** save config.ini  every 30mins **/
-    setInterval(function(){
-        ut.ini.write();
-        //ut.cookie.save();
-    },600000);
+    setInterval(function(){ ut.ini.write();},600000);
 
     /** interval check in **/
     if(ut.ini.param('system')['auto_checkin']=='yes'){
@@ -73,108 +71,116 @@ if(SERVER_PORT){
 
 var admin=ut.ini.param('system');
 var app = express();
-app.configure(function(){
-    /** view template settings **/
-    app.set('views', path.join(__dirname,'views'));
-    app.set('view engine', 'jade');
-    /** sits behind proxy which forward http request **/
-    app.enable('trust proxy');
+/** express setting begin*********************/
+/** view template settings **/
+app.set('debug',!PORT);
+app.set('views', path.join(__dirname,'views'));
+app.set('view engine', 'jade');
+/** sits behind proxy which forward http request **/
+app.enable('trust proxy');
 
-    /** 
-     * logger level : dev,tiny
-     * http://www.senchalabs.org/connect/middleware-logger.html 
-     * **/
-    if(process.env.NODE_ENV=='debug') app.use(express.logger('tiny'));
-
-    /** 
-     * http proxy request ,for example
-     * http://www.example.com/index.html
-     * https://www.example.com/index.html
-     * /http_/www.example.com/index.html
-     * /https_/www.example.com/index.html
-     **/
-    app.use(function(req,res,next){
-        var path=req.url,prefix1=path.substring(0,7),prefix2=path.substring(0,8);
-        if(prefix1=='http://' || prefix2=='https://'){
-            proxy.handle(req,res);
-        } else if(prefix1=='/http_/'){
-            req.url='http://'+path.substring(prefix1.length);
-            proxy.handle(req,res);
-        } else if(prefix2=='/https_/'){
-            req.url='https://'+path.substring(prefix2.length);
-            proxy.handle(req,res);
-        } else { 
-            next();
-        }
-    });
-    /** forward jsonrpc request to aria2c **/
-    app.use('/jsonrpc_',function (req,res,next){
-        forward('localhost',6800,'/jsonrpc'+req.url.substring(1))(req,res);
-    });
-    /** forward rpc request to aria2c **/
-    app.use('/rpc_',function (req,res,next){
-        forward('localhost',6800,'/rpc')(req,res);
-    });
-
-    app.use(express.favicon());
-    app.use(express.bodyParser());
-    //app.use(express.methodOverride());
-    //app.use(express.cookieParser('nosecret'));
-    //app.use(express.cookieSession());
-    //app.use(express.session());
-    //if(SERVER)app.use(express.compress());
-
-    /** server boostrap static css/img/javascript files **/
-    app.use(express.static(path.join(__dirname, 'bootstrap')));
-
-    /** setup admin user and pass when first access the site**/
-    app.use(function(req,res,next){
-        if(req.method=='POST'&&req.path=='/admin'){
-            user=req.body.user0;if(user)user=user.trim();
-            pass1=req.body.pass1;if(pass1)pass1=pass1.trim();
-            pass2=req.body.pass2;if(pass2)pass2=pass2.trim();
-            if(pass1!=pass2){
-                return res.render('admin',{admin:admin,error:'password not matched !!!'});
-            }
-            admin=ut.ini.param('system');
-            admin.user=user;
-            admin.pass=pass1;
-            ut.ini.write();
-            return res.redirect('/info');
-        }
-        if(req.method=='GET'&&req.path=='/admin'){
-            return res.render('admin',{admin:admin}); 
-        }
-        if(admin.user && admin.pass){
-            next();
-        }else{
-            res.render('admin',{admin:admin});
-        }
-    });
-    /** basic authen user **/
-    var auth=express.basicAuth(function(user,pass){
-        return user==admin.user&&pass==admin.pass;
-    },'more than another proxy');
-    app.use(function(req,res,next){
-        var i=req.path.indexOf('/',1);
-        if(i<0)i=req.path.length;
-        var prefix=req.path.substring(0,i);
-        if(['/info','/faq','/aria2','/admin','/tty','/delete'].indexOf(prefix)>=0 ){
-            auth(req,res,next);
-        }else{
-            next();
-        } 
-    });
-
-    app.use(app.router);
-    /** server static files **/
-    app.use(express.static(path.join(__dirname, 'static')));
-    app.use(express.static(ROOT));
-
-    /** file listing **/
-    app.use(dir.directory(ROOT));
-
+/** 
+ * logger level : dev,tiny
+ * http://www.senchalabs.org/connect/middleware-logger.html 
+ * **/
+if(app.get('debug')){
+    app.use(express.logger('tiny'));
+    app.locals.pretty = true;
+}
+/** 
+ * http proxy request ,for example
+ * http://www.example.com/index.html
+ * https://www.example.com/index.html
+ * /http_/www.example.com/index.html
+ * /https_/www.example.com/index.html
+ **/
+app.use(function(req,res,next){
+    var path=req.url,prefix1=path.substring(0,7),prefix2=path.substring(0,8);
+    if(prefix1=='http://' || prefix2=='https://'){
+        proxy.handle(req,res);
+    } else if(prefix1=='/http_/'){
+        req.url='http://'+path.substring(prefix1.length);
+        proxy.handle(req,res);
+    } else if(prefix2=='/https_/'){
+        req.url='https://'+path.substring(prefix2.length);
+        proxy.handle(req,res);
+    } else { 
+        next();
+    }
 });
+/** forward jsonrpc request to aria2c **/
+app.use('/jsonrpc_',function (req,res,next){
+    forward('localhost',6800,'/jsonrpc'+req.url.substring(1))(req,res);
+});
+/** forward rpc request to aria2c **/
+app.use('/rpc_',function (req,res,next){
+    forward('localhost',6800,'/rpc')(req,res);
+});
+
+app.use(express.favicon());
+app.use(express.bodyParser());
+//app.use(express.methodOverride());
+//app.use(express.cookieParser('nosecret'));
+//app.use(express.cookieSession());
+//app.use(express.session());
+//if(PORT)app.use(express.compress());
+
+/** server boostrap static css/img/javascript files **/
+app.use(express.static(path.join(__dirname, 'bootstrap')));
+
+/** setup admin user and pass when first access the site**/
+app.use(function(req,res,next){
+    if(req.method=='POST'&&req.path=='/admin'){
+        user=req.body.user0;if(user)user=user.trim();
+        pass1=req.body.pass1;if(pass1)pass1=pass1.trim();
+        pass2=req.body.pass2;if(pass2)pass2=pass2.trim();
+        if(pass1!=pass2){
+            return res.render('admin',{admin:admin,error:'password not matched !!!'});
+        }
+        admin=ut.ini.param('system');
+        admin.user=user;
+        admin.pass=pass1;
+        ut.ini.write();
+        return res.redirect('/info');
+    }
+    if(req.method=='GET'&&req.path=='/admin'){
+        return res.render('admin',{admin:admin}); 
+    }
+    if(admin.user && admin.pass){
+        next();
+    }else{
+        res.render('admin',{admin:admin});
+    }
+});
+/** basic authen user **/
+var auth=express.basicAuth(function(user,pass){
+    return user==admin.user&&pass==admin.pass;
+},'more than another proxy');
+app.use(function(req,res,next){
+    var i=req.path.indexOf('/',1);
+    if(i<0)i=req.path.length;
+    var prefix=req.path.substring(0,i);
+    if(['/info','/faq','/aria2','/admin','/tty','/delete'].indexOf(prefix)>=0 ){
+        auth(req,res,next);
+    }else{
+        next();
+    } 
+});
+
+app.use(app.router);
+/** server static files **/
+app.use(express.static(path.join(__dirname, 'static')));
+app.use(express.static(ROOT));
+
+/** file listing **/
+app.use(dir.directory(ROOT));
+
+if(app.get('debug')){
+    app.use(express.errorHandler({ showStack: true, dumpExceptions: true }));
+}else{
+    app.use(express.errorHandler());
+}
+/** express setting ends*********************/
 
 app.post('/API/JSONRPC',function(req,res){
     var method=req.body.method;
@@ -192,6 +198,8 @@ app.post('/API/JSONRPC',function(req,res){
         }else if(method=='httptask.addTask'){
             //params is the same format as aria2c input file
             rtn=httptask.queueDownload([proxy.download,params]);
+        }else if(method=='httptask.pauseTask'){
+            rtn=httptask.pauseTask(params.taskid);
         }else if(method=='httptask.abortTask'){
             rtn=httptask.abortTask(params.taskid);
         }else if(method=='httptask.listTask'){
@@ -213,12 +221,6 @@ app.post('/API/JSONRPC',function(req,res){
     }
 });
 
-app.configure('development', function(){
-    app.use(express.errorHandler({ showStack: true, dumpExceptions: true }));
-});
-app.configure('production', function(){
-    app.use(express.errorHandler());
-});
 
 /** goagent request **/
 app.post('/agentfetch',goagent.serve);
@@ -238,6 +240,10 @@ app.get('/_process',function(req,res){
         if(err){ return res.send(500,err); }
         res.send(200,stdout);
     });
+});
+app.get('/mtap.log',function(req,res){
+    res.set('Content-Type','text/plain; charset=utf-8');
+    res.sendfile(path.join(__dirname, 'mtap.log'));
 });
 
 app.get('/faq',function(req,res){
@@ -283,6 +289,7 @@ app.post('/info',function(req,res){
     res.redirect('/');
 });
 app.get(/^\/delete\/(.+)$/,function(req,res){
+    if(!wrench)wrench = require('wrench');
     try{
         var filename=req.params[0];
         var filepath=path.join(ROOT,filename);
@@ -324,8 +331,36 @@ app.post('/_upload',function(req,res){
     res.send('upload done\r\n');
 });
 
+app.post('/xunlei/scan',function(req,res){
+    try{
+        var loginuser=req.body.loginuser,loginpass=req.body.loginpass,scantarget=req.body.scantarget;
+        var valid=loginuser&&loginpass&&scantarget;
+        if(!valid)throw new Error('loginuser & loginpass & scantarget missing');
+        var scan=site['xunlei.scan'];
+        scan(loginuser,loginpass,scantarget);
+        res.send('scan begins....');
+    }catch(err){
+        console.warn(err);
+        res.send('scan failed');
+    }
+
+});
+app.post('/uptobox/download',function(req,res){
+    try{
+        var url=req.body.download_url;
+        var download=site['uptobox.download'];
+        download(url);
+        res.send('download begins:'+url);
+    }catch(err){
+        console.warn(err);
+        res.send('download failed:'+url);
+    }
+
+});
+
+
 /** server is ready for http request**/
-if(SERVER_PORT){
+if(PORT){
     var tty=require('./tty/tty.js');
     var ttyapp=tty.createServer({
         express:app,
@@ -335,6 +370,7 @@ if(SERVER_PORT){
     ttyapp.listen();
     var httpserver=ttyapp.server;
 }else{
+    PORT=80;
     var httpserver=http.createServer(app);
     httpserver.listen(PORT, function(){
       console.log("Express server listening on port %s",PORT);

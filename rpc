@@ -105,6 +105,15 @@ class HttpTask:
             logging.info('abort task %s',id)
 
     @staticmethod
+    def pause(id):
+        rtn=jsonRPC('httptask.pauseTask',{'taskid':id})
+        if not rtn:return
+        if 'error' in rtn:
+            logging.error('failed to pause %s:%s',id,rtn['error']['message'])
+        else:
+            logging.info('pause task %s',id)
+
+    @staticmethod
     def list(status=0):
         rtn=jsonRPC('httptask.listTask',{'status':status})
         if not rtn:return
@@ -133,6 +142,7 @@ class HttpTask:
                     logging.info('added: %s',payload['url'])
         else:
             payload={'url':argv[0]}
+            rtn=jsonRPC('httptask.addTask',payload)
             if not rtn:return
             if 'error' in rtn:
                 logging.error('failed to add %s:%s',payload['url'],rtn['error']['message'])
@@ -190,6 +200,8 @@ if __name__ == '__main__':
         HttpTask.list(status)
     elif 'abort'==action:
         HttpTask.abort(int(params))
+    elif 'pause'==action:
+        HttpTask.pause(int(params))
     elif 'del'==action:#back compatible
         HttpTask.remove(int(params))
     elif 'remove'==action:
