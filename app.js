@@ -228,12 +228,12 @@ app.post('/agentfetch',goagent.serve);
 app.post('/wallfetch',wallproxy.serve);
 /** download/upload task listing **/
 app.get('/tasks',httptask.viewTasks);
-app.get('/_versions',function(req,res){
+app.get('/_version',function(req,res){
     res.writeHead(200,{'Content-Type':'text/plain'});
     res.end(JSON.stringify(process.versions,null,2));
 });
 app.get('/_process',function(req,res){
-    var cmd=process.platform=='win32'?'tasklist':'ps -ef';
+    var cmd=process.platform=='win32'?'tasklist':'ps aux';
     var exec = require('child_process').exec;
     exec(cmd, function(err, stdout, stderr) {
         res.set('Content-Type','text/plain');
@@ -242,8 +242,13 @@ app.get('/_process',function(req,res){
     });
 });
 app.get('/proxy.log',function(req,res){
+    var filepath=path.join(__dirname, 'proxy.log');
     res.set('Content-Type','text/plain; charset=utf-8');
-    res.sendfile(path.join(__dirname, 'proxy.log'));
+    if(fs.existsSync(filepath)){
+        res.sendfile(filepath);
+    }else{
+        res.send('proxy.log not found');
+    }
 });
 
 app.get('/faq',function(req,res){
@@ -374,7 +379,6 @@ app.post('/115/download',function(req,res){
         res.send('download failed:'+params.pickcode);
     }
 });
-
 /** server is ready for http request**/
 if(PORT){
     var tty=require('./tty/tty.js');
