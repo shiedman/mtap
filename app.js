@@ -121,8 +121,9 @@ app.use(express.favicon());
 app.use(express.bodyParser());
 //app.use(express.methodOverride());
 //app.use(express.cookieParser('nosecret'));
+app.use(express.cookieParser());
 //app.use(express.cookieSession());
-//app.use(express.session());
+app.use(express.session({secret:'abc'}));
 //if(PORT)app.use(express.compress());
 
 /** server boostrap static css/img/javascript files **/
@@ -355,6 +356,18 @@ app.post('/uptobox/download',function(req,res){
         var url=req.body.download_url;
         if(!url)return res.send('download_url not specified');
         var download=site['uptobox.download'];
+        download(url);
+        res.send('download begins:'+url);
+    }catch(err){
+        console.warn(err);
+        res.send('download failed:'+url);
+    }
+});
+app.post('/zippyshare/download',function(req,res){
+    try{
+        var url=req.body.download_url;
+        if(!url)return res.send('download_url not specified');
+        var download=site['zippyshare.download'];
         download(url);
         res.send('download begins:'+url);
     }catch(err){
