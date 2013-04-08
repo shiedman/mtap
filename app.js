@@ -121,9 +121,8 @@ app.use(express.favicon());
 app.use(express.bodyParser());
 //app.use(express.methodOverride());
 //app.use(express.cookieParser('nosecret'));
-app.use(express.cookieParser());
+//app.use(express.cookieParser());
 //app.use(express.cookieSession());
-app.use(express.session({secret:'abc'}));
 //if(PORT)app.use(express.compress());
 
 /** server boostrap static css/img/javascript files **/
@@ -392,6 +391,7 @@ app.post('/115/download',function(req,res){
         res.send('download failed:'+params.pickcode);
     }
 });
+
 /** server is ready for http request**/
 if(PORT){
     var tty=require('./tty/tty.js');
