@@ -11,7 +11,7 @@ var express = require('express')
     , fs = require('fs')
     , path = require('path')
     , urlparse = require('url').parse
-    , wrench;// = require('wrench');
+    , wrench;// delay loading
 
 var ut=require('./lib/utility.js')
   , logger=ut.logger
@@ -20,7 +20,7 @@ var ut=require('./lib/utility.js')
   , goagent = require('./lib/goagent')
   , wallproxy = require('./lib/wallproxy')
   , proxy = require('./lib/proxy')
-  , site = require('./lib/site.js')
+  , jsonrpc = require('./lib/jsonrpc')
   , forward = require('./lib/forward');
 
 /** set concurrent sockets to 10 **/
@@ -37,6 +37,16 @@ fs.exists(DOWNLOAD,function(exists){
         }
     });
 });
+setTimeout(function(){
+    console.log('Starting directory: ' + process.cwd());
+    try {
+        process.chdir(DOWNLOAD);
+        console.log('New directory: ' + process.cwd());
+    } catch (err) {
+        console.log('chdir: ' + err);
+    }
+},5000);
+
 if(PORT){
     //process.on('SIGINT',function (){ console.log(' Press Control-D to exit.');}); 
     process.on('SIGTERM',function(){
@@ -61,7 +71,7 @@ if(PORT){
     /** interval check in **/
     if(ut.ini.param('system')['auto_checkin']=='yes'){
         logger.info('auto check in every 10 mins');
-        setInterval(function(){ site.checkin(); },600000);
+        setInterval(function(){ jsonrpc.checkin(); },600000);
     }
 
     /** monitor download/upload httptask status every 30s **/
@@ -183,6 +193,19 @@ if(app.get('debug')){
 /** express setting ends*********************/
 
 app.post('/API/JSONRPC',function(req,res){
+    var obj=req.body;
+    try{
+        var func=jsonrpc[obj.method];
+        if(typeof func!='function') throw new Error('Method:'+obj.method+' not exists');
+        var rtn=func.apply(null,obj.params);
+        res.json({jsonrpc:'2.0',id:obj.id,result:rtn});
+    }catch(err){
+        console.warn(err.message);
+        console.warn(err.stack);
+        res.json({jsonrpc:'2.0',id:obj.id||null,error:{message:err.message}});
+    }
+});
+app.post('/API/JSONRPC11',function(req,res){
     var method=req.body.method;
     var params=req.body.params;
     try{
@@ -336,6 +359,7 @@ app.post('/_upload',function(req,res){
     res.send('upload done\r\n');
 });
 
+/**
 app.post('/xunlei/scan',function(req,res){
     try{
         var loginuser=req.body.loginuser,loginpass=req.body.loginpass,scantarget=req.body.scantarget;
@@ -391,7 +415,7 @@ app.post('/115/download',function(req,res){
         res.send('download failed:'+params.pickcode);
     }
 });
-
+*/
 /** server is ready for http request**/
 if(PORT){
     var tty=require('./tty/tty.js');

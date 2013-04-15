@@ -19,9 +19,10 @@
     "jade": "0.x",
     "tracer":"0.5.x",
     "wrench":"1.x",
-    "tough-cookie":"0.9.x",
     "socket.io": "0.9.x",
     "pty.js": "0.x",
+    "request": "2.x",
+    "mime":"1.x",
     "jsdom": "0.x"
   }
 }
