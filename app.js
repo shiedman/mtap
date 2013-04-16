@@ -40,7 +40,7 @@ fs.exists(DOWNLOAD,function(exists){
 setTimeout(function(){
     console.log('Starting directory: ' + process.cwd());
     try {
-        process.chdir(DOWNLOAD);
+        process.chdir(ROOT);
         console.log('New directory: ' + process.cwd());
     } catch (err) {
         console.log('chdir: ' + err);
@@ -205,7 +205,7 @@ app.post('/API/JSONRPC',function(req,res){
         res.json({jsonrpc:'2.0',id:obj.id||null,error:{message:err.message}});
     }
 });
-app.post('/API/JSONRPC11',function(req,res){
+app.post('/API/JSONRPC1',function(req,res){
     var method=req.body.method;
     var params=req.body.params;
     try{
