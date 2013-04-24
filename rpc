@@ -4,7 +4,6 @@ import xmlrpclib,urllib2
 import os,sys,json,datetime,logging,re
 PORT=os.environ.get('PORT_WWW') or os.environ.get('PORT_PROXY') or 80
 JSON_RPC_URL='http://localhost:%s/API/JSONRPC'%PORT
-#JSON_RPC_URL='http://mtapfile.herokuapp.com/API/JSONRPC'
 
 def sizeof_fmt(num):
     for x in ['bytes','KB','MB','GB','TB']:
