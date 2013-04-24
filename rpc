@@ -4,6 +4,7 @@ import xmlrpclib,urllib2
 import os,sys,json,datetime,logging,re
 PORT=os.environ.get('PORT_WWW') or os.environ.get('PORT_PROXY') or 80
 JSON_RPC_URL='http://localhost:%s/API/JSONRPC'%PORT
+#JSON_RPC_URL='http://mtapfile.herokuapp.com/API/JSONRPC'
 
 def sizeof_fmt(num):
     for x in ['bytes','KB','MB','GB','TB']:
@@ -131,7 +132,7 @@ class HttpTask:
 
     @staticmethod
     def add(argv):
-        if argv[0]=='--input':
+        if argv[0]=='-i':
             filepath=argv[1]
             for payload in parseInput(filepath):
                 url=payload['url']
@@ -162,12 +163,12 @@ def execute(method,uri):
         uri=os.path.abspath(uri)
         rtn=jsonRPC(method,[uri])
     else:
-        return logging.warn('uri not valid:%s'%uri)
+        return logging.warn('uri not valid:%s',uri)
     if not rtn:return
     if 'error' in rtn:
         logging.error('upload failed:%s',rtn['error']['message'])
     else:
-        logging.info('%s - %s: %s'%(method,uri,rtn['result']))
+        logging.info(rtn['result'])
 
 def aria2c_rpc(argv):
     rpc=Aria2c()
@@ -182,7 +183,7 @@ def aria2c_rpc(argv):
             logging.warn('not uri: %s',url)
     elif len(argv)==2 and argv[0]=='del' :
         rpc.remove(argv[1])
-    elif len(argv)==2 and argv[0]=='--input':
+    elif len(argv)==2 and argv[0]=='-i':
         filepath=argv[1]
         for d in parseInput(filepath):
             url=d['url']
@@ -227,7 +228,7 @@ if __name__ == '__main__':
     else:
         logging.info('unknow parameters:%s',argv)
         logging.info('only support the following commands')
-        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url>\nrpc add --input <file>')
+        logging.info('rpc ls\nrpc del <taskid>\nrpc abort <taskid>\nrpc add <url>\nrpc add -i <file>')
         logging.info('********************************************')
-        logging.info('rpc aria2c\nrpc aria2c <url>\nrpc aria2c --input <input file>\nrpc aria2c --torrent <torrent file>')
+        logging.info('rpc aria2c\nrpc aria2c <url>\nrpc aria2c -i <input file>\nrpc aria2c --torrent <torrent file>')
 
